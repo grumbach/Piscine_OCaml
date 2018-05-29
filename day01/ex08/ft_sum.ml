@@ -14,7 +14,7 @@ let ft_sum f i n =
 	if i > n then
 		nan
 	else let rec actual_sum f i n rax =
-		if i == n then
+		if i = n then
 			f i +. rax
 		else
 			actual_sum f (i + 1) n ((f i) +. rax)

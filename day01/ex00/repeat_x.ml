@@ -6,14 +6,14 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/05/28 13:45:35 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/05/28 13:58:08 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/05/29 12:24:19 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
 let rec repeat_x n =
 	if n < 0 then
 		"Error"
-	else if n == 0 then
+	else if n = 0 then
 		""
 	else
 		"x" ^ repeat_x (n - 1)

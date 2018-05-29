@@ -13,7 +13,7 @@
 let rec converges f x n =
 	if n < 0 then
 		false
-	else if (f x) == x then
+	else if (f x) = x then
 		true
 	else
 		converges f (f x) (n - 1)
