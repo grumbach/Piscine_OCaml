@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/05/30 17:34:02 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/05/30 22:50:46 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/05/31 18:00:19 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -42,7 +42,7 @@ let generate_nucleotide type_char =
 
 type helix = nucleotide list
 
-let rec generate_helix n =
+let rec generate_helix n :helix =
 	if n <= 0 then
 		[]
 	else
@@ -50,7 +50,7 @@ let rec generate_helix n =
 		and rand_char = char_of_int (65 + (Random.int 4))
 		in generate_nucleotide rand_char :: generate_helix (n - 1)
 
-let rec helix_to_string h =
+let rec helix_to_string (h:helix) =
 	match h with
 	| [] -> ""
 	| hd :: tl ->
@@ -63,7 +63,7 @@ let rec helix_to_string h =
 		| None -> "_"
 	in base ^ (helix_to_string tl)
 
-let rec complementary_helix h =
+let rec complementary_helix (h:helix) :helix =
 	match h with
 	| [] -> []
 	| hd :: tl ->
