@@ -12,7 +12,9 @@
 
 (* ---------------------------- types --------------------------------------- *)
 
-type coordinates = int * int
+type coordinate = int | Incorrect
+
+type coordinates = Valid of coordinate * coordinate | Invalid of string
 
 type symbol = O | X | None
 
