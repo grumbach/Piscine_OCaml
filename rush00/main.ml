@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/02 14:13:34 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/03 16:44:33 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/03 17:01:13 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -49,8 +49,7 @@ let rec main_loop board player =
   then Board.display_board board
   else
     match player with
+	| Board.X | Board.None -> main_loop (do_player_turn board Board.O) Board.O
     | Board.O -> main_loop (do_player_turn board Board.X) Board.X
-    | Board.X -> main_loop (do_player_turn board Board.O) Board.O
-    | _       -> main_loop (do_player_turn board player) player
 
-let () = main_loop (Board.new_board ()) Board.X
+let () = main_loop (Board.new_board ()) Board.None

@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/02 17:25:37 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/03 16:54:21 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/03 17:39:41 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -33,29 +33,54 @@ let coordinate_proj c = match c with
   | Correct n -> n
   | Incorrect -> -1
 
+(* ---------------------------- resolve ------------------------------------- *)
+
+let resolve (cell:cell)									:symbol =
+	let check_if_symbol_X_won =
+		match cell with
+		| (X, X, X, _, _, _, _, _, _) -> true
+		| (_, _, _, X, X, X, _, _, _) -> true
+		| (_, _, _, _, _, _, X, X, X) -> true
+		| (_, _, X, _, _, X, _, _, X) -> true
+		| (_, X, _, _, X, _, _, X, _) -> true
+		| (X, _, _, X, _, _, X, _, _) -> true
+		| (X, _, _, _, X, _, _, _, X) -> true
+		| (_, _, X, _, X, _, X, _, _) -> true
+		| _ -> false
+	and check_if_symbol_O_won =
+		match cell with
+		| (O, O, O, _, _, _, _, _, _) -> true
+		| (_, _, _, O, O, O, _, _, _) -> true
+		| (_, _, _, _, _, _, O, O, O) -> true
+		| (_, _, O, _, _, O, _, _, O) -> true
+		| (_, O, _, _, O, _, _, O, _) -> true
+		| (O, _, _, O, _, _, O, _, _) -> true
+		| (O, _, _, _, O, _, _, _, O) -> true
+		| (_, _, O, _, O, _, O, _, _) -> true
+		| _ -> false
+	in
+	if check_if_symbol_X_won then
+		X
+	else if check_if_symbol_O_won then
+		O
+	else
+		None
+
 (* ---------------------------- is_there_a_winner --------------------------- *)
 
-let is_there_a_winner board =
-	false
+let is_there_a_winner (board:board) :symbol =
+	None
 
 (* ---------------------------- newBoard ------------------------------------ *)
 
 let new_board () =
-  let bobo:cell = ((O) , (O)    , (None),
-				   (O) , (X)    , (None),
-				   (O) , (X)    , (None))
-
-  and boba:cell = ((O) , (None) , (None),
-				   (X) , (X)    , (X),
-				   (O) , (X)    , (None))
-
-  and bobi:cell = ((O) , (None) , (None),
-				   (X) , (None) , (X),
-				   (O) , (X)    , (None))
+  let empty:cell = ((None), (None), (None),
+					(None), (None), (None),
+					(None), (None), (None))
 	in
-	(bobi, boba, bobo,
-	bobo, bobo, bobo,
-	bobo, bobo, bobi)
+	(empty, empty, empty,
+	 empty, empty, empty,
+	 empty, empty, empty)
 
 (* ---------------------------- is_move_available --------------------------- *)
 
@@ -94,15 +119,15 @@ let is_move_available (board:board) (x:int) (y:int)				:bool =
 	and cell_y_pos = get_123_range y
 	in
 	match cell_number with
-	| 1 -> is_cell_symbol_none c1 cell_y_pos cell_x_pos
-	| 2 -> is_cell_symbol_none c2 cell_y_pos cell_x_pos
-	| 3 -> is_cell_symbol_none c3 cell_y_pos cell_x_pos
-	| 4 -> is_cell_symbol_none c4 cell_y_pos cell_x_pos
-	| 5 -> is_cell_symbol_none c5 cell_y_pos cell_x_pos
-	| 6 -> is_cell_symbol_none c6 cell_y_pos cell_x_pos
-	| 7 -> is_cell_symbol_none c7 cell_y_pos cell_x_pos
-	| 8 -> is_cell_symbol_none c8 cell_y_pos cell_x_pos
-	| 9 -> is_cell_symbol_none c9 cell_y_pos cell_x_pos
+	| 1 when resolve c1 = None -> is_cell_symbol_none c1 cell_y_pos cell_x_pos
+	| 2 when resolve c2 = None -> is_cell_symbol_none c2 cell_y_pos cell_x_pos
+	| 3 when resolve c3 = None -> is_cell_symbol_none c3 cell_y_pos cell_x_pos
+	| 4 when resolve c4 = None -> is_cell_symbol_none c4 cell_y_pos cell_x_pos
+	| 5 when resolve c5 = None -> is_cell_symbol_none c5 cell_y_pos cell_x_pos
+	| 6 when resolve c6 = None -> is_cell_symbol_none c6 cell_y_pos cell_x_pos
+	| 7 when resolve c7 = None -> is_cell_symbol_none c7 cell_y_pos cell_x_pos
+	| 8 when resolve c8 = None -> is_cell_symbol_none c8 cell_y_pos cell_x_pos
+	| 9 when resolve c9 = None -> is_cell_symbol_none c9 cell_y_pos cell_x_pos
 	| _ -> false
 
 (* ---------------------------- add_player_move ----------------------------- *)
@@ -113,16 +138,34 @@ let generate_sym (replace:bool) (old_symbol:symbol) (new_symbol:symbol) :symbol 
 	else
 		old_symbol
 
+let is_cell_full (cell:cell) :bool =
+	match cell with
+	| (None, _, _, _, _, _, _, _, _) -> false
+	| (_, None, _, _, _, _, _, _, _) -> false
+	| (_, _, None, _, _, _, _, _, _) -> false
+	| (_, _, _, None, _, _, _, _, _) -> false
+	| (_, _, _, _, None, _, _, _, _) -> false
+	| (_, _, _, _, _, None, _, _, _) -> false
+	| (_, _, _, _, _, _, None, _, _) -> false
+	| (_, _, _, _, _, _, _, None, _) -> false
+	| (_, _, _, _, _, _, _, _, None) -> false
+	| _ -> true
+
 let add_move_to_cell (cell:cell) (x:int) (y:int) (s:symbol) :cell =
 	let (s1, s2, s3, s4, s5, s6, s7, s8, s9) = cell
 	and pos = 3 * (y - 1) + x
 	in
-	((generate_sym (1 = pos) s1 s), (generate_sym (2 = pos) s2 s),
-	 (generate_sym (3 = pos) s3 s),
-	 (generate_sym (4 = pos) s4 s), (generate_sym (5 = pos) s5 s),
-	 (generate_sym (6 = pos) s6 s),
-	 (generate_sym (7 = pos) s7 s), (generate_sym (8 = pos) s8 s),
-	 (generate_sym (9 = pos) s9 s))
+	let new_cell = ((generate_sym (1 = pos) s1 s), (generate_sym (2 = pos) s2 s),
+					(generate_sym (3 = pos) s3 s),
+					(generate_sym (4 = pos) s4 s), (generate_sym (5 = pos) s5 s),
+					(generate_sym (6 = pos) s6 s),
+					(generate_sym (7 = pos) s7 s), (generate_sym (8 = pos) s8 s),
+					(generate_sym (9 = pos) s9 s))
+	in
+	if is_cell_full new_cell then (* s won cell x y ! *)
+		(s, s, s, s, s, s, s, s, s)
+	else
+		new_cell
 
 let generate_cell (cell:cell) (keep:bool) (x:int) (y:int) (symbol:symbol) :cell=
 	if keep then
@@ -145,39 +188,6 @@ let add_player_move (board:board) (x:int) (y:int) (symbol:symbol)		:board =
 	 (generate_cell c7 (cn <> 7) px py symbol),
 	 (generate_cell c8 (cn <> 8) px py symbol),
 	 (generate_cell c9 (cn <> 9) px py symbol))
-
-(* ---------------------------- resolve ------------------------------------- *)
-
-let resolve (cell:cell)									:symbol =
-	let check_if_symbol_X_won =
-		match cell with
-		| (X, X, X, _, _, _, _, _, _) -> true
-		| (_, _, _, X, X, X, _, _, _) -> true
-		| (_, _, _, _, _, _, X, X, X) -> true
-		| (_, _, X, _, _, X, _, _, X) -> true
-		| (_, X, _, _, X, _, _, X, _) -> true
-		| (X, _, _, X, _, _, X, _, _) -> true
-		| (X, _, _, _, X, _, _, _, X) -> true
-		| (_, _, X, _, X, _, X, _, _) -> true
-		| _ -> false
-	and check_if_symbol_O_won =
-		match cell with
-		| (O, O, O, _, _, _, _, _, _) -> true
-		| (_, _, _, O, O, O, _, _, _) -> true
-		| (_, _, _, _, _, _, O, O, O) -> true
-		| (_, _, O, _, _, O, _, _, O) -> true
-		| (_, O, _, _, O, _, _, O, _) -> true
-		| (O, _, _, O, _, _, O, _, _) -> true
-		| (O, _, _, _, O, _, _, _, O) -> true
-		| (_, _, O, _, O, _, O, _, _) -> true
-		| _ -> false
-	in
-	if check_if_symbol_X_won then
-		X
-	else if check_if_symbol_O_won then
-		O
-	else
-		None
 
 (* ---------------------------- display_board ------------------------------- *)
 
