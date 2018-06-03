@@ -19,10 +19,10 @@ let is_digit c = c >= '0' && c <= '9'
 let is_move_valid (move:string) =
   if (String.length move) <> 1
   then false
-  else is_digit (String.get move 1)
+  else is_digit (String.get move 0)
 
 let digit_of_move (m:string) =
-  (int_of_char (String.get m 1)) - (int_of_char '0')
+  (int_of_char (String.get m 0)) - (int_of_char '0')
 
 let coordinate_of_move (m:string) =
   if is_move_valid m
@@ -32,9 +32,10 @@ let coordinate_of_move (m:string) =
 let coordinates_of_move (move_x:string) (move_y:string) =
   let coordinates = Board.Pair (coordinate_of_move move_x, coordinate_of_move move_y)
   in
+  (* TODO Remove pattern matching, useless with handle_player_turn *)
   match coordinates with
   | Board.Pair (_, Board.Incorrect)
-  | Board.Pair (Board.Incorrect, _)  -> Board.Invalid ("Incorrect format.")
+  | Board.Pair (Board.Incorrect, _)  -> Board.Invalid ("Incorrect format")
   | _                                -> coordinates
 
 let parse_coordinates (user_move:string) =

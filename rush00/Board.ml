@@ -28,16 +28,39 @@ type board = cell * cell * cell
 		   * cell * cell * cell
 		   * cell * cell * cell
 
+
+(* ---------------------------- newBoard ------------------------------------ *)
+
+let new_board () =
+  let bobo:cell = ((O) , (O)    , (None),
+                   (O) , (X)    , (None),
+                   (O) , (X)    , (None))
+
+  and boba:cell = ((O) , (None) , (None),
+                   (X) , (X)    , (X),
+                   (O) , (X)    , (None))
+
+  and bobi:cell = ((O) , (None) , (None),
+                   (X) , (None) , (X),
+                   (O) , (X)    , (None)) in
+
+  (bobi, boba, bobo,
+   bobo, bobo, bobo,
+   bobo, bobo, bobi)
+
+(* ---------------------------- is_there_a_winner --------------------------- *)
+let is_there_a_winner board = false
+
 (* ---------------------------- add_player_move ----------------------------- *)
 
-let is_move_available ((x:int), (y:int))				:bool =
+let is_move_available (x, y)				            :bool =
 	true
 
 (* TODO add_player_move *)
 (* TODO add_player_move makes board full of X if X puts last symbol into
 the grid (no other way to know who played last....) *)
 
-let add_player_move (board:board) ((x:int), (y:int))	:board =
+let add_player_move (board:board) (c:coordinates)	:board =
 	board
 
 

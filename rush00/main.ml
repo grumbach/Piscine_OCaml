@@ -10,17 +10,43 @@
 (*                                                                            *)
 (* ************************************************************************** *)
 
-let () =
-	let bobo = ((Board.O) , (Board.O) , (Board.None),
-				(Board.O) , (Board.X) , (Board.None),
-				(Board.O) , (Board.X) , (Board.None))
-	and boba = ((Board.O) , (Board.None) , (Board.None),
-				(Board.X) , (Board.X) , (Board.X),
-				(Board.O) , (Board.X) , (Board.None))
-	and bobi = ((Board.O) , (Board.None) , (Board.None),
-				(Board.X) , (Board.None) , (Board.X),
-				(Board.O) , (Board.X) , (Board.None))
-	in
-		Board.display_board (bobi, boba, bobo,
-							bobo, bobo, bobo,
-							bobo, bobo, bobi)
+(* TODO Change function name *)
+let rec handle_player_turn board =
+  let player_move = UserInterface.get_user_move () in
+  match player_move with
+  | Board.Invalid (msg)
+    ->
+     begin
+       print_endline msg;
+       handle_player_turn board
+     end
+  | Board.Pair (Board.Incorrect, _) | Board.Pair (_, Board.Incorrect)
+    ->
+     begin
+       print_endline "Incorrect format.";
+       handle_player_turn board
+     end
+  | Board.Pair (x, y) when Board.is_move_available (x, y)
+    ->
+     Board.add_player_move board player_move
+  | _
+    ->
+     begin
+       print_endline "Illegal move.";
+       handle_player_turn board
+     end
+
+(* TODO Change function name *)
+let do_player_turn player board =
+  begin
+    Board.display_board board;
+    print_endline (player ^ "'s turn to play.");
+    handle_player_turn board
+  end
+
+let rec main_loop board =
+  if Board.is_there_a_winner board
+  then Board.display_board board
+  else main_loop (do_player_turn "Joueur1" board)
+
+let () = main_loop (Board.new_board ())
