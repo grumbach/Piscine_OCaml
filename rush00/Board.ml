@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/02 17:25:37 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/03 18:13:31 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/03 19:36:56 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -17,6 +17,8 @@ type coordinate = Correct of int | Incorrect
 type coordinates = Pair of coordinate * coordinate | Invalid of string
 
 type symbol = O | X | None
+
+type game_winner = Winner of symbol | Draw
 
 (* board of 9 cell containing 9 symbol *)
 
@@ -68,16 +70,34 @@ let resolve (cell:cell)									:symbol =
 
 (* ---------------------------- is_there_a_winner --------------------------- *)
 
-let is_there_a_winner (board:board) :symbol =
+let is_cell_full (cell:cell) :bool =
+	match cell with
+	| (None, _, _, _, _, _, _, _, _) -> false
+	| (_, None, _, _, _, _, _, _, _) -> false
+	| (_, _, None, _, _, _, _, _, _) -> false
+	| (_, _, _, None, _, _, _, _, _) -> false
+	| (_, _, _, _, None, _, _, _, _) -> false
+	| (_, _, _, _, _, None, _, _, _) -> false
+	| (_, _, _, _, _, _, None, _, _) -> false
+	| (_, _, _, _, _, _, _, None, _) -> false
+	| (_, _, _, _, _, _, _, _, None) -> false
+	| _ -> true
+
+let is_there_a_winner (board:board) :game_winner =
 	let (c1, c2, c3, c4, c5, c6, c7, c8, c9) = board in
-	resolve ((resolve c1), (resolve c2), (resolve c3),
-			 (resolve c4), (resolve c5), (resolve c6),
-			 (resolve c7), (resolve c8), (resolve c9))
+	let sol = ((resolve c1), (resolve c2), (resolve c3),
+			  (resolve c4), (resolve c5), (resolve c6),
+			  (resolve c7), (resolve c8), (resolve c9))
+	in
+	if is_cell_full sol then
+		Draw
+	else
+		Winner (resolve sol)
 
 (* ---------------------------- newBoard ------------------------------------ *)
 
 let new_board () =
-  let empty:cell = ((None), (None), (None),
+	let empty:cell = ((None), (None), (None),
 					(None), (None), (None),
 					(None), (None), (None))
 	in
@@ -156,19 +176,6 @@ let generate_sym (replace:bool) (old_symbol:symbol) (new_symbol:symbol) :symbol 
 		new_symbol
 	else
 		old_symbol
-
-let is_cell_full (cell:cell) :bool =
-	match cell with
-	| (None, _, _, _, _, _, _, _, _) -> false
-	| (_, None, _, _, _, _, _, _, _) -> false
-	| (_, _, None, _, _, _, _, _, _) -> false
-	| (_, _, _, None, _, _, _, _, _) -> false
-	| (_, _, _, _, None, _, _, _, _) -> false
-	| (_, _, _, _, _, None, _, _, _) -> false
-	| (_, _, _, _, _, _, None, _, _) -> false
-	| (_, _, _, _, _, _, _, None, _) -> false
-	| (_, _, _, _, _, _, _, _, None) -> false
-	| _ -> true
 
 let add_move_to_cell (cell:cell) (x:int) (y:int) (s:symbol) :cell =
 	let (s1, s2, s3, s4, s5, s6, s7, s8, s9) = cell

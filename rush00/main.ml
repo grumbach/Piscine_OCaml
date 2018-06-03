@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/02 14:13:34 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/03 17:01:13 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/03 19:31:41 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -65,7 +65,13 @@ let do_player_turn board player =
 let rec main_loop board player =
   let winner = Board.is_there_a_winner board
   in
-  if winner <> Board.None
+  if winner = Board.Draw
+  then
+    begin
+      print_endline "Draw! No winner";
+      Board.display_board board
+    end
+  else if winner <> Board.Winner (None)
   then
     begin
       print_endline ((Board.str_of_sym player) ^ " wins the game!\n");
