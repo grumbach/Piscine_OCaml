@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/02 17:25:37 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/03 17:39:41 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/03 17:55:01 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -129,6 +129,22 @@ let is_move_available (board:board) (x:int) (y:int)				:bool =
 	| 8 when resolve c8 = None -> is_cell_symbol_none c8 cell_y_pos cell_x_pos
 	| 9 when resolve c9 = None -> is_cell_symbol_none c9 cell_y_pos cell_x_pos
 	| _ -> false
+
+(* ---------------------------- get_cell_from_coordinates ------------------- *)
+
+let get_cell_from_coordinates board x y :cell =
+	let (c1, c2, c3, c4, c5, c6, c7, c8, c9) = board
+	and cn = get_cell_number_with x y in
+	match cn with
+	| 1 -> c1
+	| 2 -> c2
+	| 3 -> c3
+	| 4 -> c4
+	| 5 -> c5
+	| 6 -> c6
+	| 7 -> c7
+	| 8 -> c8
+	| _ -> c9
 
 (* ---------------------------- add_player_move ----------------------------- *)
 
