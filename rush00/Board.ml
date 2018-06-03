@@ -6,15 +6,15 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/02 17:25:37 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/03 01:03:21 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/03 12:54:59 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
 (* ---------------------------- types --------------------------------------- *)
 
-type coordinate = int | Incorrect
+type coordinate = Correct of int | Incorrect
 
-type coordinates = Valid of coordinate * coordinate | Invalid of string
+type coordinates = Pair of coordinate * coordinate | Invalid of string
 
 type symbol = O | X | None
 
@@ -30,15 +30,20 @@ type board = cell * cell * cell
 
 (* ---------------------------- add_player_move ----------------------------- *)
 
+let is_move_available ((x:int), (y:int))				:bool =
+	true
+
 (* TODO add_player_move *)
 (* TODO add_player_move makes board full of X if X puts last symbol into
 the grid (no other way to know who played last....) *)
 
-(* let add_player_move (board:board) (move:coordinates)	:board = *)
+let add_player_move (board:board) ((x:int), (y:int))	:board =
+	board
+
 
 (* ---------------------------- resolve ------------------------------------- *)
 
-let resolve (cell:cell)					:symbol =
+let resolve (cell:cell)									:symbol =
 	let check_if_symbol_X_won =
 		match cell with
 		| (X, X, X, _, _, _, _, _, _) -> true
@@ -121,20 +126,3 @@ let display_board (board:board) :unit =
 	end
 
 (* ---------------------------- end ----------------------------------------- *)
-
-(* TODO put this in main!! *)
-
-let () =
-	let bobo = ((O) , (O) , (None),
-				(O) , (X) , (None),
-				(O) , (X) , (None))
-	and boba = ((O) , (None) , (None),
-				(X) , (X) , (X),
-				(O) , (X) , (None))
-	and bobi = ((O) , (None) , (None),
-				(X) , (None) , (X),
-				(O) , (X) , (None))
-	in
-		display_board (bobi, boba, bobo,
-						bobo, bobo, bobo,
-						bobo, bobo, bobi)

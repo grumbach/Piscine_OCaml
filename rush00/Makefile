@@ -6,16 +6,13 @@
 #    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/05/31 15:22:28 by agrumbac          #+#    #+#              #
-#    Updated: 2018/06/02 18:01:13 by agrumbac         ###   ########.fr        #
+#    Updated: 2018/06/03 12:58:44 by agrumbac         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = toc
 
-SOURCES = \
-	srcs/Board.ml \
-	srcs/UserInterface.ml \
-	srcs/main.ml
+SOURCES = Board.ml UserInterface.ml main.ml
 
 CAMLC = ocamlc
 CAMLOPT = ocamlopt
@@ -24,7 +21,7 @@ CAMLDEP = ocamldep
 all: .depend $(NAME)
 
 $(NAME): opt byt
-	ln -fs $(NAME).byt $(NAME)
+	@ln -fs $(NAME).byt $(NAME)
 
 opt: $(NAME).opt
 byt: $(NAME).byt
@@ -51,8 +48,8 @@ $(NAME).opt: $(OPTOBJS)
 	$(CAMLOPT) -c $<
 
 clean:
-	rm -f srcs/*.cm[iox]
-	rm -f srcs/*.o
+	rm -f *.cm[iox]
+	rm -f *.o
 
 fclean: clean
 	rm -f $(NAME)
