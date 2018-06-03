@@ -29,6 +29,10 @@ type board = cell * cell * cell
 		   * cell * cell * cell
 
 
+let coordinate_proj c = match c with
+  | Correct n -> n
+  | Incorrect -> -1
+
 (* ---------------------------- newBoard ------------------------------------ *)
 
 let new_board () =
@@ -60,7 +64,7 @@ let is_move_available (x, y)				            :bool =
 (* TODO add_player_move makes board full of X if X puts last symbol into
 the grid (no other way to know who played last....) *)
 
-let add_player_move (board:board) (c:coordinates)	:board =
+let add_player_move (board:board) (x:int) (y:int) player	:board =
 	board
 
 
