@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/02 17:25:37 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/03 17:55:01 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/03 18:13:31 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -69,7 +69,10 @@ let resolve (cell:cell)									:symbol =
 (* ---------------------------- is_there_a_winner --------------------------- *)
 
 let is_there_a_winner (board:board) :symbol =
-	None
+	let (c1, c2, c3, c4, c5, c6, c7, c8, c9) = board in
+	resolve ((resolve c1), (resolve c2), (resolve c3),
+			 (resolve c4), (resolve c5), (resolve c6),
+			 (resolve c7), (resolve c8), (resolve c9))
 
 (* ---------------------------- newBoard ------------------------------------ *)
 
