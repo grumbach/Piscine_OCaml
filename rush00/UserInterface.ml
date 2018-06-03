@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/02 17:25:33 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/03 12:58:51 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/03 16:52:27 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -41,7 +41,7 @@ let coordinates_of_move (move_x:string) (move_y:string) =
 let parse_coordinates (user_move:string) =
   let moves = String.split_on_char ' ' user_move in
   match moves with
-  | x::y::[] -> coordinates_of_move x y
+  | y::x::[] -> coordinates_of_move x y
   | _        -> Board.Invalid ("Incorrect format")
 
 let get_user_move () =

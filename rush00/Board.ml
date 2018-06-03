@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/02 17:25:37 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/03 12:54:59 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/03 16:54:21 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -33,40 +33,118 @@ let coordinate_proj c = match c with
   | Correct n -> n
   | Incorrect -> -1
 
+(* ---------------------------- is_there_a_winner --------------------------- *)
+
+let is_there_a_winner board =
+	false
+
 (* ---------------------------- newBoard ------------------------------------ *)
 
 let new_board () =
   let bobo:cell = ((O) , (O)    , (None),
-                   (O) , (X)    , (None),
-                   (O) , (X)    , (None))
+				   (O) , (X)    , (None),
+				   (O) , (X)    , (None))
 
   and boba:cell = ((O) , (None) , (None),
-                   (X) , (X)    , (X),
-                   (O) , (X)    , (None))
+				   (X) , (X)    , (X),
+				   (O) , (X)    , (None))
 
   and bobi:cell = ((O) , (None) , (None),
-                   (X) , (None) , (X),
-                   (O) , (X)    , (None)) in
+				   (X) , (None) , (X),
+				   (O) , (X)    , (None))
+	in
+	(bobi, boba, bobo,
+	bobo, bobo, bobo,
+	bobo, bobo, bobi)
 
-  (bobi, boba, bobo,
-   bobo, bobo, bobo,
-   bobo, bobo, bobi)
+(* ---------------------------- is_move_available --------------------------- *)
 
-(* ---------------------------- is_there_a_winner --------------------------- *)
-let is_there_a_winner board = false
+let get_123_range n =
+	let range = n mod 3 in
+	match range with
+	| 0 -> 3
+	| _ -> range
+
+let get_cell_number_with x y =
+	let match_position_cell n =
+		match n with
+		| n when n <= 3 -> 1
+		| n when n <= 6 -> 2
+		| _ -> 3
+	in (3 * ((match_position_cell y) - 1) + (match_position_cell x))
+
+let is_move_available (board:board) (x:int) (y:int)				:bool =
+	let is_cell_symbol_none (cell:cell) (cell_y:int) (cell_x:int) =
+		let index = 3 * (cell_y - 1) + cell_x in
+		match cell with
+		| (None, _, _, _, _, _, _, _, _) when index = 1 -> true
+		| (_, None, _, _, _, _, _, _, _) when index = 2 -> true
+		| (_, _, None, _, _, _, _, _, _) when index = 3 -> true
+		| (_, _, _, None, _, _, _, _, _) when index = 4 -> true
+		| (_, _, _, _, None, _, _, _, _) when index = 5 -> true
+		| (_, _, _, _, _, None, _, _, _) when index = 6 -> true
+		| (_, _, _, _, _, _, None, _, _) when index = 7 -> true
+		| (_, _, _, _, _, _, _, None, _) when index = 8 -> true
+		| (_, _, _, _, _, _, _, _, None) when index = 9 -> true
+		| _ -> false
+	in
+	let (c1, c2, c3, c4, c5, c6, c7, c8, c9) = board
+	and cell_number = get_cell_number_with x y
+	and cell_x_pos = get_123_range x
+	and cell_y_pos = get_123_range y
+	in
+	match cell_number with
+	| 1 -> is_cell_symbol_none c1 cell_y_pos cell_x_pos
+	| 2 -> is_cell_symbol_none c2 cell_y_pos cell_x_pos
+	| 3 -> is_cell_symbol_none c3 cell_y_pos cell_x_pos
+	| 4 -> is_cell_symbol_none c4 cell_y_pos cell_x_pos
+	| 5 -> is_cell_symbol_none c5 cell_y_pos cell_x_pos
+	| 6 -> is_cell_symbol_none c6 cell_y_pos cell_x_pos
+	| 7 -> is_cell_symbol_none c7 cell_y_pos cell_x_pos
+	| 8 -> is_cell_symbol_none c8 cell_y_pos cell_x_pos
+	| 9 -> is_cell_symbol_none c9 cell_y_pos cell_x_pos
+	| _ -> false
 
 (* ---------------------------- add_player_move ----------------------------- *)
 
-let is_move_available (x, y)				            :bool =
-	true
+let generate_sym (replace:bool) (old_symbol:symbol) (new_symbol:symbol) :symbol =
+	if replace then
+		new_symbol
+	else
+		old_symbol
 
-(* TODO add_player_move *)
-(* TODO add_player_move makes board full of X if X puts last symbol into
-the grid (no other way to know who played last....) *)
+let add_move_to_cell (cell:cell) (x:int) (y:int) (s:symbol) :cell =
+	let (s1, s2, s3, s4, s5, s6, s7, s8, s9) = cell
+	and pos = 3 * (y - 1) + x
+	in
+	((generate_sym (1 = pos) s1 s), (generate_sym (2 = pos) s2 s),
+	 (generate_sym (3 = pos) s3 s),
+	 (generate_sym (4 = pos) s4 s), (generate_sym (5 = pos) s5 s),
+	 (generate_sym (6 = pos) s6 s),
+	 (generate_sym (7 = pos) s7 s), (generate_sym (8 = pos) s8 s),
+	 (generate_sym (9 = pos) s9 s))
 
-let add_player_move (board:board) (x:int) (y:int) player	:board =
-	board
+let generate_cell (cell:cell) (keep:bool) (x:int) (y:int) (symbol:symbol) :cell=
+	if keep then
+		cell
+	else
+		add_move_to_cell cell x y symbol
 
+let add_player_move (board:board) (x:int) (y:int) (symbol:symbol)		:board =
+	let (c1, c2, c3, c4, c5, c6, c7, c8, c9) = board
+	and cn = get_cell_number_with x y
+	and px = get_123_range x
+	and py = get_123_range y
+	in
+	((generate_cell c1 (cn <> 1) px py symbol),
+	 (generate_cell c2 (cn <> 2) px py symbol),
+	 (generate_cell c3 (cn <> 3) px py symbol),
+	 (generate_cell c4 (cn <> 4) px py symbol),
+	 (generate_cell c5 (cn <> 5) px py symbol),
+	 (generate_cell c6 (cn <> 6) px py symbol),
+	 (generate_cell c7 (cn <> 7) px py symbol),
+	 (generate_cell c8 (cn <> 8) px py symbol),
+	 (generate_cell c9 (cn <> 9) px py symbol))
 
 (* ---------------------------- resolve ------------------------------------- *)
 
@@ -100,7 +178,6 @@ let resolve (cell:cell)									:symbol =
 		O
 	else
 		None
-
 
 (* ---------------------------- display_board ------------------------------- *)
 

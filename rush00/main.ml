@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/02 14:13:34 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/03 12:58:56 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/03 16:44:33 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -26,7 +26,7 @@ let rec handle_player_turn board player =
        print_endline "Incorrect format.";
        handle_player_turn board player
      end
-  | Board.Pair (x, y) when Board.is_move_available (x, y)
+  | Board.Pair (x, y) when Board.is_move_available board (Board.coordinate_proj x) (Board.coordinate_proj y)
     ->
      Board.add_player_move board (Board.coordinate_proj x) (Board.coordinate_proj y) player
   | _
