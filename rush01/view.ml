@@ -17,6 +17,7 @@ type action = Eat | Thunder | Bath | Kill | Waiting | Retry | Save | Load | Exit
 
 module type GRAPHIC_INTERFACE =
 	sig
+		val init : unit -> unit
 		val draw : Tama.pet -> Tama.TamaMonad.t
 		val get_action : unit -> action
 		val draw_exit : unit -> unit
@@ -29,6 +30,7 @@ module type USER_INTERFACE =
 		val main : unit -> unit
 		val apply_action : action -> Tama.TamaMonad.t -> float -> Tama.TamaMonad.t
 	end
+
 
 module type MAKE_USER_INTERFACE =
 	functor (Graphic_Interface:GRAPHIC_INTERFACE) -> (USER_INTERFACE)
@@ -49,15 +51,15 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 					)
 					fct
 				)
-				(Tama.TamaMonad.backup_to "./auto_save")
+				(Tama.TamaMonad.backup_to "./save.itama")
 			in
 			match act with
 			| Eat 		-> bind_tama_t Tama.TamaMonad.eat
 			| Thunder	-> bind_tama_t Tama.TamaMonad.thunder
 			| Bath		-> bind_tama_t Tama.TamaMonad.bath
 			| Kill		-> bind_tama_t Tama.TamaMonad.kill
-			| Save		-> bind_tama_t (Tama.TamaMonad.backup_to "./save_1")
-			| Load		-> bind_tama_t (Tama.TamaMonad.recover_from "./save_1")
+			| Save		-> bind_tama_t (Tama.TamaMonad.backup_to "./save.itama_1")
+			| Load		-> bind_tama_t (Tama.TamaMonad.recover_from "./save.itama_1")
 			| Retry 	-> bind_tama_t (fun (x:Tama.pet) -> Tama.TamaMonad.return (new Tama.pet 100 100 100 100))
 			| _			-> bind_tama_t Tama.TamaMonad.return
 		
@@ -82,12 +84,101 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 					(
 						if (sec -. prev_sec < 1.) then prev_sec else sec
 					)
-		in main_loop (Tama.TamaMonad.auto_load ()) (Graphic_Interface.getTime ())	
+		in Graphic_Interface.init () ; main_loop (Tama.TamaMonad.auto_load ()) (Graphic_Interface.getTime ())	
 	end
+
+
+module Graphics : GRAPHIC_INTERFACE =
+	struct
+		let getTime () = Unix.gettimeofday ()
+
+		let init () = Graphics.open_graph "" ; Graphics.set_window_title "tamagochiii <3"
+
+		let draw_pika x y = 
+			Graphics.fill_rect (x / 4) (y / 3) (x / 2) (y / 3)	;
+			Graphics.fill_circle ((x * 2) / 9) ((y * 2) / 3) (70)	;
+			Graphics.fill_circle ((x * 7) / 9) ((y * 2) / 3) (70)	;
+			Graphics.set_color Graphics.white	;
+			Graphics.fill_circle ((x * 2) / 6) ((y * 2) / 3 - 30) (70)	;
+			Graphics.fill_circle ((x * 4) / 6) ((y * 2) / 3 - 30) (70)	;
+			Graphics.fill_rect ((x * 2) / 6) (y * 2/ 5) (x - (x * 2) / 6) (y / 10)	;
+			Graphics.set_color Graphics.black
+
+
+		let draw_hud x y health energy hygiene happiness  =
+			Graphics.moveto (x / 7) (y - (y / 6)) ;
+			Graphics.draw_string ("health: " ^ (string_of_int health)) ;
+			Graphics.rmoveto (x / 7) 0 ;
+			Graphics.draw_string ("energy: " ^ (string_of_int energy)) ;
+			Graphics.rmoveto (x / 7) 0 ;
+			Graphics.draw_string ("hygiene: " ^ (string_of_int hygiene)) ;
+			Graphics.rmoveto (x / 7) 0 ;
+			Graphics.draw_string ("happiness: " ^ (string_of_int happiness)) 
+
+		let draw_buttons x y = 
+			let draw_b x y dx dy str = 
+				Graphics.draw_rect x y dx dy ; 
+				Graphics.moveto (x + (dx) / 3) (y + (dy /2));
+				Graphics.draw_string str
+			in
+			draw_b (x / 6) (y / 12) (x / 7) (y / 12) 			"Save"		;
+			draw_b (x / 6) (y / 6 + 20) (x / 7) (y / 12) 		"Eat"		;
+			draw_b (x * 2 / 6) (y / 12) (x / 7) (y / 12) 		"Retry"		;
+			draw_b (x * 2 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Thunder"	;
+			draw_b (x * 3 / 6) (y / 12) (x / 7) (y / 12) 		"Load"		;
+			draw_b (x * 3 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Bath"		;	
+			draw_b (x * 4 / 6) (y / 12) (x / 7) (y / 12) 		"Exit"		;
+			draw_b (x * 4 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Kill"		;
+			()
+
+		let draw tama = 
+			Graphics.resize_window 1200 1000 ; Graphics.clear_graph () ;
+
+			draw_pika (Graphics.size_x ()) (Graphics.size_y ())  ;
+			let (health, energy, hygiene, happiness) = tama#return_data_tuple in
+			draw_hud (Graphics.size_x ()) (Graphics.size_y ()) health energy hygiene happiness 
+			; 
+			draw_buttons (Graphics.size_x ()) (Graphics.size_y ())
+			;
+			Tama.TamaMonad.return tama
+
+
+
+		let get_action () = 
+			try 
+
+				print_endline "Available actions : ";
+				print_endline "\teat  - bath - kill - thunder";
+				print_endline "\texit - save - load - retry";
+
+				match String.lowercase_ascii (
+						String.trim (
+							read_line ()
+						)
+					)
+				with
+				| "eat" 	-> Eat 
+				| "thunder" -> Thunder
+				| "bath"	-> Bath
+				| "kill"	-> Kill
+				| "save"	-> Save
+				| "retry"	-> Retry
+				| "load"	-> Load
+				| "exit"	-> Exit
+				| x 		-> Waiting
+			with
+			| _ 			-> Waiting 
+
+		let draw_exit () = print_endline "Goodbye. Hope you enjoyed"
+
+	end
+
 
 module Shell : GRAPHIC_INTERFACE =
 	struct
 		let getTime () = Unix.gettimeofday ()
+
+		let init () = ()
 
 		let draw_pika () = 
 				print_endline "       ,___          .-;'";
@@ -105,8 +196,6 @@ module Shell : GRAPHIC_INTERFACE =
 				print_endline "            '._)"
 
 		let draw tama = 
-
-			
 			if tama#is_dead then print_endline "TAMA IS DED, like, soooo DED" else draw_pika () ;
 			let (health, energy, hygiene, happiness) = tama#return_data_tuple in
 			print_string "health[" ; print_int health; print_endline "]" ;
@@ -145,6 +234,7 @@ module Shell : GRAPHIC_INTERFACE =
 	end
 
 module Shell_User_Interface : USER_INTERFACE = Make_User_Interface (Shell)
+module Graphics_User_Interface : USER_INTERFACE = Make_User_Interface (Graphics)
 
 (*
 

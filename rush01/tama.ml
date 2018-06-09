@@ -150,7 +150,7 @@ struct
 		return (new pet (hp) (en) (hy) (ha))
 
 	let auto_load () =
-		match recover_from "./auto_save" (new pet 0 0 0 0) with
+		match recover_from "./save.itama" (new pet 0 0 0 0) with
 		| Dead -> 	return (new pet 100 100 100 100)
 		| Alive x -> return x
 
