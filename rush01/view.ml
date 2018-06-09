@@ -64,7 +64,7 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 		let main () = 
 			let rec main_loop tama_t prev_sec = 
 				let tama_t 	= 
-					Tama.TamaMonad.bind tama_t Graphic_Interface.draw 
+					Tama.TamaMonad.apply tama_t Graphic_Interface.draw  ;
 				in let sec 	= Graphic_Interface.getTime () in 
 				let action 	= Graphic_Interface.get_action () 	in
 				match action with
@@ -89,17 +89,35 @@ module Shell : GRAPHIC_INTERFACE =
 	struct
 		let getTime () = Unix.gettimeofday ()
 
+		let draw_pika () = 
+				print_endline "       ,___          .-;'";
+				print_endline "       `\"-.`\\_...._/`.`";
+				print_endline "    ,      \\        /";
+				print_endline " .-' ',    / ()   ()\\";
+				print_endline "`'._   \\  /()    .  (|";
+				print_endline "    > .' ;,     -'-  /";
+				print_endline "   / <   |;,     __.;";
+				print_endline "   '-.'-.|  , \\    , \\";
+				print_endline "      `>.|;, \\_)    \\_)";
+				print_endline "       `-;     ,    /";
+				print_endline "          \\    /   <";
+				print_endline "           '. <`'-,_)";
+				print_endline "            '._)"
+
 		let draw tama = 
+
+			
+			if tama#is_dead then print_endline "TAMA IS DED, like, soooo DED" else draw_pika () ;
 			let (health, energy, hygiene, happiness) = tama#return_data_tuple in
 			print_string "health[" ; print_int health; print_endline "]" ;
 			print_string "energy[" ; print_int energy; print_endline "]" ;
 			print_string "hygiene[" ; print_int hygiene; print_endline "]" ;
 			print_string "happiness[" ; print_int happiness; print_endline "]" ;
-			if tama#is_dead then print_endline "TAMA IS DED, like, soooo DED"
 			; Tama.TamaMonad.return tama
 
 		let get_action () = 
 			try 
+
 				print_endline "Available actions : ";
 				print_endline "\teat  - bath - kill - thunder";
 				print_endline "\texit - save - load - retry";
