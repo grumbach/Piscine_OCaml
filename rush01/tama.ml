@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/08 23:06:57 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/09 00:02:03 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/09 15:11:35 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -72,15 +72,37 @@ class pet initial_Health initial_Energy initial_Hygiene initial_Happiness =
 
 module TamaMonad =
 struct
-	type 'a t = Alive of pet | Asleep | Dead
+	type t = Alive of pet | Dead
 
-	let return x = Alive x
+	let return x =
+		if x#is_dead then Dead else Alive x
 
-	let bind x (f:'a -> 'b t) =
+	let bind x (f:pet -> t) =
 		match x with
 		| Alive tama -> f tama
-		| Asleep -> Asleep
 		| Dead -> Dead
+
+(* ------------------------- methods ---------------------------------------- *)
+
+	let eat (tama:pet) :t =
+		let new_tama = tama#eat in
+		if new_tama#is_dead then Dead else Alive new_tama
+
+	let thunder (tama:pet) :t =
+		let new_tama = tama#thunder in
+		if new_tama#is_dead then Dead else Alive new_tama
+
+	let bath (tama:pet) :t =
+		let new_tama = tama#bath in
+		if new_tama#is_dead then Dead else Alive new_tama
+
+	let kill (tama:pet) :t =
+		let new_tama = tama#kill in
+		if new_tama#is_dead then Dead else Alive new_tama
+
+	let decrease_health_by_1 (tama:pet) :t =
+		let new_tama = tama#decrease_health_by_1 in
+		if new_tama#is_dead then Dead else Alive new_tama
 
 (* ------------------------- recover_from ----------------------------------- *)
 
@@ -88,12 +110,18 @@ struct
 		let (hp, en, hy, ha) =
 			try
 				let istream = open_in filename in
-				let line = input_line istream in
-				(* TODO actually read (hp, en, hy, ha) from line!! *)
-					close_in istream;
-					(42, 42, 42, 42)
+				try
+					let line = input_line istream in
+						close_in istream;
+					let parse_list lst =
+						match lst with
+						| hp :: en :: hy :: ha :: [] -> (int_of_string hp, int_of_string en, int_of_string hy, int_of_string ha)
+						| _ -> (100, 100, 100, 100)
+					in parse_list (String.split_on_char ' ' line)
+				with
+				| _ -> close_in istream; failwith ("[TAMA hates you] failed reading from: " ^ filename)
 			with
-			| _ -> failwith ("[TAMA hates you] failed reading from: " ^ filename)
+			| _ -> failwith ("[TAMA hates you] failed opening: " ^ filename)
 		in
 		return (new pet (hp) (en) (hy) (ha))
 
@@ -101,16 +129,18 @@ struct
 
 	let backup_to x filename =
 		match x with
-		| Asleep -> Asleep
 		| Dead -> Dead
 		| Alive tama ->
 			try
-				let ostream = open_out filename
-				and (hp, en, hy, ha) = tama#return_data_tuple in
-				Printf.fprintf ostream "%d %d %d %d\n" (hp) (en) (hy) (ha);
-				close_out ostream;
-				Asleep
+				let ostream = open_out filename in
+				try
+					let (hp, en, hy, ha) = tama#return_data_tuple in
+					Printf.fprintf ostream "%d %d %d %d\n" (hp) (en) (hy) (ha);
+					close_out ostream;
+					Alive tama
+				with
+				| _ -> close_out ostream; failwith ("[TAMA hates you] failed writing to: " ^ filename)
 			with
-			| _ -> failwith ("[TAMA hates you] failed saving to: " ^ filename)
+			| _ -> failwith ("[TAMA hates you] failed opening: " ^ filename)
 
 end
