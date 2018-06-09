@@ -12,35 +12,81 @@
 
 (* this manages the view *)
 
+type action = Eat | Thunder | Bath | Kill | Waiting | Retry | Save | Load | Exit
 
-module type GRAPHIC =
+
+module type GRAPHIC_INTERFACE =
 	sig
-		type action = Eat | Thunder | Bath | Kill | Waiting | Retry | Save | Load | Exit
 		val draw : Tama.pet -> Tama.TamaMonad.t
-		val main : unit -> unit
 		val get_action : unit -> action
+		val draw_exit : unit -> unit
+		val getTime : unit -> float
 	end
 
-(*
+
 module type USER_INTERFACE = 
 	sig
-	
+		val main : unit -> unit
+		val apply_action : action -> Tama.TamaMonad.t -> float -> Tama.TamaMonad.t
 	end
 
 module type MAKE_USER_INTERFACE =
-	functor (Graphic_interface:GRAPHIC_INTERFACE) -> (USER_INTERFACE)
+	functor (Graphic_Interface:GRAPHIC_INTERFACE) -> (USER_INTERFACE)
 
 module Make_User_Interface : MAKE_USER_INTERFACE =
 	functor (Graphic_Interface:GRAPHIC_INTERFACE) ->
 	struct
-	
+		let apply_action act tama_t delta_seconds =
+			let bind_tama_t = Tama.TamaMonad.bind (Tama.TamaMonad.bind tama_t (Tama.TamaMonad.decrease_health_by_n delta_seconds)) in  
+			match act with
+			| Eat 		-> bind_tama_t Tama.TamaMonad.eat
+			| Thunder	-> bind_tama_t Tama.TamaMonad.thunder
+			| Bath		-> bind_tama_t Tama.TamaMonad.bath
+			| Kill		-> bind_tama_t Tama.TamaMonad.kill
+			| Save		-> bind_tama_t (Tama.TamaMonad.backup_to "./auto_save")
+			| Load		-> bind_tama_t (Tama.TamaMonad.recover_from "./auto_save")
+			| _			-> bind_tama_t Tama.TamaMonad.return
+		
+		let main () = 
+			let rec main_loop tama_t prev_sec = 
+				let tama_t 	= 
+					Tama.TamaMonad.bind tama_t Graphic_Interface.draw 
+				in let sec 	= Graphic_Interface.getTime () in 
+				let action 	= Graphic_Interface.get_action () 	in
+				match action with
+				| Exit -> Graphic_Interface.draw_exit ()
+				| Retry -> 
+					main_loop 
+					(
+						Tama.TamaMonad.return 
+						(
+							new Tama.pet 100 100 100 100
+						)
+					)
+					(
+						sec
+					)
+				| _ -> 
+					main_loop 
+					(
+						apply_action
+						(
+							action
+						) 
+						tama_t
+						(sec -. prev_sec)
+					) 
+					(
+						if (sec -. prev_sec < 1.) then prev_sec else sec
+					)
+		in main_loop (Tama.TamaMonad.return (new Tama.pet 100 100 100 100)) (Graphic_Interface.getTime ())	
 	end
-*)
 
 
-module Shell : GRAPHIC =
+module Shell : GRAPHIC_INTERFACE =
 	struct
-		type action = Eat | Thunder | Bath | Kill | Waiting | Retry | Save | Load | Exit
+		let getTime () = Unix.gettimeofday ()
+
 		let draw tama = 
 			let (health, energy, hygiene, happiness) = tama#return_data_tuple in
 			print_string "health[" ; print_int health; print_endline "]" ;
@@ -74,54 +120,11 @@ module Shell : GRAPHIC =
 			with
 			| _ 			-> Waiting 
 
-		let apply_action act tama_t delta_seconds =
-			let bind_tama_t = Tama.TamaMonad.bind (Tama.TamaMonad.bind tama_t (Tama.TamaMonad.decrease_health_by_n delta_seconds)) in  
-			match act with
-			| Eat 		-> bind_tama_t Tama.TamaMonad.eat
-			| Thunder	-> bind_tama_t Tama.TamaMonad.thunder
-			| Bath		-> bind_tama_t Tama.TamaMonad.bath
-			| Kill		-> bind_tama_t Tama.TamaMonad.kill
-			| Save		-> bind_tama_t (Tama.TamaMonad.backup_to "./auto_save")
-			| Load		-> bind_tama_t (Tama.TamaMonad.recover_from "./auto_save")
-			| _			-> bind_tama_t Tama.TamaMonad.return
-			
-		let main () = 
-			let rec main_loop tama_t prev_sec = 
-				let tama_t 	= 
-					Tama.TamaMonad.bind tama_t draw 
-				in let sec 	= Unix.gettimeofday () 		in 
-				let action 	= get_action () 	in
-				match action with
-				| Exit -> print_endline "Goodbye. Hope you enjoyed"
-				| Retry -> 
-					main_loop 
-					(
-						Tama.TamaMonad.return 
-						(
-							new Tama.pet 100 100 100 100
-						)
-					)
-					(
-						sec
-					)
-				| _ -> 
-					main_loop 
-					(
-						apply_action
-						(
-							action
-						) 
-						tama_t
-						(sec -. prev_sec)
-					) 
-					(
-						if (sec -. prev_sec < 1.) then prev_sec else sec
-					)
-		in main_loop (Tama.TamaMonad.return (new Tama.pet 100 100 100 100)) (Unix.gettimeofday ())
+		let draw_exit () = print_endline "Goodbye. Hope you enjoyed"
 
 	end
 
-(*module Shell_User_Interface : USER_INTERFACE = Make (Shell)*)
+module Shell_User_Interface : USER_INTERFACE = Make_User_Interface (Shell)
 
 (*
 

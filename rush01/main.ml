@@ -13,4 +13,4 @@
 (* this is the base controller *)
 
 let () =
-	View.Shell.main ()
+	View.Shell_User_Interface.main ()

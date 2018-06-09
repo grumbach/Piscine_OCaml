@@ -131,7 +131,7 @@ struct
 				let istream = open_in filename in
 				try
 					let line = input_line istream in
-						close_in istream; print_endline ("[TO REMOVE]line: " ^ line);
+						close_in istream;
 					let parse_list lst =
 						match lst with
 						| hp :: en :: hy :: ha :: [] -> (int_of_string hp, int_of_string en, int_of_string hy, int_of_string ha)
