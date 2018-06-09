@@ -92,6 +92,11 @@ struct
 		| Alive tama -> f tama
 		| Dead -> Dead
 
+	let apply x (f:pet -> t) =
+		match x with
+		| Alive tama -> f tama
+		| Dead -> bind (f (new pet 0 0 0 0)) return
+
 (* ------------------------- methods ---------------------------------------- *)
 
 	let eat (tama:pet) :t =
@@ -143,6 +148,12 @@ struct
 			| _ -> prerr_endline ("[TAMA hates you] failed opening: " ^ filename); (0, 0, 0, 0)
 		in
 		return (new pet (hp) (en) (hy) (ha))
+
+	let auto_load () =
+		match recover_from "./auto_save" (new pet 0 0 0 0) with
+		| Dead -> 	return (new pet 100 100 100 100)
+		| Alive x -> return x
+
 
 (* ------------------------- backup_to -------------------------------------- *)
 

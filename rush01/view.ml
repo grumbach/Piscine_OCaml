@@ -37,14 +37,28 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 	functor (Graphic_Interface:GRAPHIC_INTERFACE) ->
 	struct
 		let apply_action act tama_t delta_seconds =
-			let bind_tama_t = Tama.TamaMonad.bind (Tama.TamaMonad.bind tama_t (Tama.TamaMonad.decrease_health_by_n delta_seconds)) in  
+			let bind_tama_t fct =
+				Tama.TamaMonad.apply
+				(					
+					Tama.TamaMonad.bind
+					(
+						Tama.TamaMonad.bind tama_t
+						(
+							Tama.TamaMonad.decrease_health_by_n delta_seconds
+						)
+					)
+					fct
+				)
+				(Tama.TamaMonad.backup_to "./auto_save")
+			in
 			match act with
 			| Eat 		-> bind_tama_t Tama.TamaMonad.eat
 			| Thunder	-> bind_tama_t Tama.TamaMonad.thunder
 			| Bath		-> bind_tama_t Tama.TamaMonad.bath
 			| Kill		-> bind_tama_t Tama.TamaMonad.kill
-			| Save		-> bind_tama_t (Tama.TamaMonad.backup_to "./auto_save")
-			| Load		-> bind_tama_t (Tama.TamaMonad.recover_from "./auto_save")
+			| Save		-> bind_tama_t (Tama.TamaMonad.backup_to "./save_1")
+			| Load		-> bind_tama_t (Tama.TamaMonad.recover_from "./save_1")
+			| Retry 	-> bind_tama_t (fun (x:Tama.pet) -> Tama.TamaMonad.return (new Tama.pet 100 100 100 100))
 			| _			-> bind_tama_t Tama.TamaMonad.return
 		
 		let main () = 
@@ -55,17 +69,6 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 				let action 	= Graphic_Interface.get_action () 	in
 				match action with
 				| Exit -> Graphic_Interface.draw_exit ()
-				| Retry -> 
-					main_loop 
-					(
-						Tama.TamaMonad.return 
-						(
-							new Tama.pet 100 100 100 100
-						)
-					)
-					(
-						sec
-					)
 				| _ -> 
 					main_loop 
 					(
@@ -79,9 +82,8 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 					(
 						if (sec -. prev_sec < 1.) then prev_sec else sec
 					)
-		in main_loop (Tama.TamaMonad.return (new Tama.pet 100 100 100 100)) (Graphic_Interface.getTime ())	
+		in main_loop (Tama.TamaMonad.auto_load ()) (Graphic_Interface.getTime ())	
 	end
-
 
 module Shell : GRAPHIC_INTERFACE =
 	struct
