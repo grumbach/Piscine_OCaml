@@ -15,50 +15,69 @@
 class pet initial_Health initial_Energy initial_Hygiene initial_Happiness =
 	object (self)
 
-		val _Health:int = initial_Health
-		val _Energy:int = initial_Energy
-		val _Hygiene:int = initial_Hygiene
-		val _Happiness:int = initial_Happiness
+		val _Health:int = 
+		
+			match initial_Health with
+			| x when x > 100	 -> 100
+			| x when x < 0 		 -> 0
+			| x 				 -> x 
+
+		val _Energy:int = 
+		
+			match initial_Energy with
+			| x when x > 100	 -> 100
+			| x when x < 0 		 -> 0
+			| x 				 -> x 
+
+		val _Hygiene:int = 
+		
+			match initial_Hygiene with
+			| x when x > 100	 -> 100
+			| x when x < 0 		 -> 0
+			| x 				 -> x 
+
+		val _Happiness:int = 
+		
+			match initial_Happiness with
+			| x when x > 100	 -> 100
+			| x when x < 0 		 -> 0
+			| x 				 -> x 
+
 
 		method eat =
-		{<
-			_Health = _Health + 25;
-			_Energy = _Energy - 10;
-			_Hygiene = _Hygiene - 20;
-			_Happiness = _Happiness + 5
-		>}
+			new pet
+				(_Health + 25)
+				(_Energy - 10)
+				(_Hygiene - 20)
+				(_Happiness + 5)
 
 		method thunder =
-		{<
-			_Health = _Health - 20;
-			_Energy = _Energy + 25;
-			_Hygiene = _Hygiene;
-			_Happiness = _Happiness - 20
-		>}
+			new pet
+				(_Health - 20)
+				(_Energy + 25)
+				_Hygiene
+				(_Happiness - 20)
 
 		method bath =
-		{<
-			_Health = _Health - 20;
-			_Energy = _Energy - 10;
-			_Hygiene = _Hygiene + 25;
-			_Happiness = _Happiness + 5
-		>}
+			new pet
+				(_Health - 20)
+				(_Energy - 10)
+				(_Hygiene + 25)
+				(_Happiness + 5)
 
 		method kill =
-		{<
-			_Health = _Health - 20;
-			_Energy = _Energy - 10;
-			_Hygiene = _Hygiene;
-			_Happiness = _Happiness + 20
-		>}
+			new pet
+				(_Health - 20)
+				(_Energy - 10)
+				_Hygiene
+				(_Happiness + 20)
 
 		method decrease_health_by_1 =
-		{<
-			_Health = _Health - 1;
-			_Energy = _Energy;
-			_Hygiene = _Hygiene;
-			_Happiness = _Happiness
-		>}
+			new pet
+				(_Health - 1)
+				_Energy
+				_Hygiene
+				_Happiness
 
 		method is_dead :bool =
 			(_Health <= 0 || _Energy <= 0 || _Hygiene <= 0 || _Happiness <= 0)
@@ -104,9 +123,18 @@ struct
 		let new_tama = tama#decrease_health_by_1 in
 		if new_tama#is_dead then Dead else Alive new_tama
 
+	let decrease_health_by_n (n:float) (tama:pet)  :t =
+		let rec loop tama n = 
+			if (n >= 1.)
+			then loop tama#decrease_health_by_1 (n -. 1.)
+			else tama
+		in
+		let new_tama = loop tama n in
+		if new_tama#is_dead then Dead else Alive new_tama
+
 (* ------------------------- recover_from ----------------------------------- *)
 
-	let recover_from filename =
+	let recover_from filename (tama:pet) =
 		let (hp, en, hy, ha) =
 			try
 				let istream = open_in filename in
@@ -119,28 +147,26 @@ struct
 						| _ -> (100, 100, 100, 100)
 					in parse_list (String.split_on_char ' ' line)
 				with
-				| _ -> close_in istream; failwith ("[TAMA hates you] failed reading from: " ^ filename)
+				| _ -> close_in istream; prerr_endline ("[TAMA hates you] failed reading from: " ^ filename) ; (0, 0, 0, 0)
 			with
-			| _ -> failwith ("[TAMA hates you] failed opening: " ^ filename)
+			| _ -> print_endline ("[TAMA hates you] failed opening: " ^ filename); (0, 0, 0, 0)
 		in
 		return (new pet (hp) (en) (hy) (ha))
 
 (* ------------------------- backup_to -------------------------------------- *)
 
-	let backup_to x filename =
-		match x with
-		| Dead -> Dead
-		| Alive tama ->
+	let backup_to filename (tama:pet) =
+		begin
 			try
 				let ostream = open_out filename in
 				try
 					let (hp, en, hy, ha) = tama#return_data_tuple in
 					Printf.fprintf ostream "%d %d %d %d\n" (hp) (en) (hy) (ha);
-					close_out ostream;
-					Alive tama
+					close_out ostream
 				with
-				| _ -> close_out ostream; failwith ("[TAMA hates you] failed writing to: " ^ filename)
+				| _ -> close_out ostream; print_endline ("[TAMA hates you] failed writing to: " ^ filename)
 			with
-			| _ -> failwith ("[TAMA hates you] failed opening: " ^ filename)
-
+			| _ -> print_endline ("[TAMA hates you] failed opening: " ^ filename)
+		end ;
+		return tama
 end

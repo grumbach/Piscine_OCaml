@@ -2,6 +2,7 @@
 *.cmx
 *.cmo
 *.opt
+*.o
 *.byt
 _build
 .depend
