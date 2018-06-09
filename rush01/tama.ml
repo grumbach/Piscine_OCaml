@@ -15,30 +15,21 @@
 class pet initial_Health initial_Energy initial_Hygiene initial_Happiness =
 	object (self)
 
-		val _Health:int = 
-		
-			match initial_Health with
+		val _Health:int = match initial_Health with
+			| x when x > 100	 -> 100
+			| x when x < 0 		 -> 0
+			| x 				 -> x 
+		val _Energy:int = match initial_Energy with
 			| x when x > 100	 -> 100
 			| x when x < 0 		 -> 0
 			| x 				 -> x 
 
-		val _Energy:int = 
-		
-			match initial_Energy with
+		val _Hygiene:int = match initial_Hygiene with
 			| x when x > 100	 -> 100
 			| x when x < 0 		 -> 0
 			| x 				 -> x 
 
-		val _Hygiene:int = 
-		
-			match initial_Hygiene with
-			| x when x > 100	 -> 100
-			| x when x < 0 		 -> 0
-			| x 				 -> x 
-
-		val _Happiness:int = 
-		
-			match initial_Happiness with
+		val _Happiness:int = match initial_Happiness with
 			| x when x > 100	 -> 100
 			| x when x < 0 		 -> 0
 			| x 				 -> x 
@@ -140,16 +131,16 @@ struct
 				let istream = open_in filename in
 				try
 					let line = input_line istream in
-						close_in istream;
+						close_in istream; print_endline ("[TO REMOVE]line: " ^ line);
 					let parse_list lst =
 						match lst with
 						| hp :: en :: hy :: ha :: [] -> (int_of_string hp, int_of_string en, int_of_string hy, int_of_string ha)
-						| _ -> (100, 100, 100, 100)
+						| _ -> failwith "parse_list"
 					in parse_list (String.split_on_char ' ' line)
 				with
 				| _ -> close_in istream; prerr_endline ("[TAMA hates you] failed reading from: " ^ filename) ; (0, 0, 0, 0)
 			with
-			| _ -> print_endline ("[TAMA hates you] failed opening: " ^ filename); (0, 0, 0, 0)
+			| _ -> prerr_endline ("[TAMA hates you] failed opening: " ^ filename); (0, 0, 0, 0)
 		in
 		return (new pet (hp) (en) (hy) (ha))
 
@@ -164,9 +155,9 @@ struct
 					Printf.fprintf ostream "%d %d %d %d\n" (hp) (en) (hy) (ha);
 					close_out ostream
 				with
-				| _ -> close_out ostream; print_endline ("[TAMA hates you] failed writing to: " ^ filename)
+				| _ -> close_out ostream; prerr_endline ("[TAMA hates you] failed writing to: " ^ filename)
 			with
-			| _ -> print_endline ("[TAMA hates you] failed opening: " ^ filename)
+			| _ -> prerr_endline ("[TAMA hates you] failed opening: " ^ filename)
 		end ;
 		return tama
 end

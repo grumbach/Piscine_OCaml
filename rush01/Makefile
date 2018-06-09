@@ -6,7 +6,7 @@
 #    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/05/31 15:22:28 by agrumbac          #+#    #+#              #
-#    Updated: 2018/06/08 23:08:01 by agrumbac         ###   ########.fr        #
+#    Updated: 2018/06/09 19:03:35 by mgrimald         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,8 +19,9 @@ CAMLOPT = ocamlopt
 CAMLDEP = ocamldep
 
 
-LIBS= $(WITHGRAPICS)
+LIBS= $(WITHGRAPICS) $(WITHUNIX) 
 WITHGRAPICS = graphics.cma -cclib -lGraphics
+WITHUNIX = unix.cma
 
 all: .depend $(NAME)
 

@@ -13,4 +13,4 @@
 (* this is the base controller *)
 
 let () =
-	View.Shell.main_loop (Tama.TamaMonad.return (new Tama.pet 100 100 100 100)) 0.
+	View.Shell.main ()

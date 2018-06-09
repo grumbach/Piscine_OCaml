@@ -17,7 +17,7 @@ module type GRAPHIC =
 	sig
 		type action = Eat | Thunder | Bath | Kill | Waiting | Retry | Save | Load | Exit
 		val draw : Tama.pet -> Tama.TamaMonad.t
-		val main_loop : Tama.TamaMonad.t -> float -> unit
+		val main : unit -> unit
 		val get_action : unit -> action
 	end
 
@@ -81,43 +81,43 @@ module Shell : GRAPHIC =
 			| Thunder	-> bind_tama_t Tama.TamaMonad.thunder
 			| Bath		-> bind_tama_t Tama.TamaMonad.bath
 			| Kill		-> bind_tama_t Tama.TamaMonad.kill
-			| Save		-> bind_tama_t (Tama.TamaMonad.backup_to "./Save/auto")
-			| Load		-> bind_tama_t (Tama.TamaMonad.recover_from "./Save/auto")
+			| Save		-> bind_tama_t (Tama.TamaMonad.backup_to "./auto_save")
+			| Load		-> bind_tama_t (Tama.TamaMonad.recover_from "./auto_save")
 			| _			-> bind_tama_t Tama.TamaMonad.return
 			
-
-		let rec main_loop tama_t prev_sec = 
-			let tama_t 	= 
-				Tama.TamaMonad.bind tama_t draw 
-			in let sec 	= Sys.time () 		in 
-			let action 	= get_action () 	in
-			match action with
-			| Exit -> print_endline "Goodbye"
-			| Retry -> 
-				main_loop 
-				(
-					Tama.TamaMonad.return 
+		let main () = 
+			let rec main_loop tama_t prev_sec = 
+				let tama_t 	= 
+					Tama.TamaMonad.bind tama_t draw 
+				in let sec 	= Unix.gettimeofday () 		in 
+				let action 	= get_action () 	in
+				match action with
+				| Exit -> print_endline "Goodbye. Hope you enjoyed"
+				| Retry -> 
+					main_loop 
 					(
-						new Tama.pet 100 100 100 100
+						Tama.TamaMonad.return 
+						(
+							new Tama.pet 100 100 100 100
+						)
 					)
-				)
-				(
-					Sys.time ()
-				)
-			| _ -> 
-				main_loop 
-				(
-					apply_action
 					(
-						action
+						sec
+					)
+				| _ -> 
+					main_loop 
+					(
+						apply_action
+						(
+							action
+						) 
+						tama_t
+						(sec -. prev_sec)
 					) 
-					tama_t
-					(sec -. prev_sec)
-				) 
-				(
-					sec
-				)
-
+					(
+						if (sec -. prev_sec < 1.) then prev_sec else sec
+					)
+		in main_loop (Tama.TamaMonad.return (new Tama.pet 100 100 100 100)) (Unix.gettimeofday ())
 
 	end
 
