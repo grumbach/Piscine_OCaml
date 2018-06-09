@@ -6,22 +6,24 @@
 #    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/05/31 15:22:28 by agrumbac          #+#    #+#              #
-#    Updated: 2018/06/09 19:03:35 by mgrimald         ###   ########.fr        #
+#    Updated: 2018/06/09 20:03:49 by agrumbac         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = tama
 
-SOURCES = tama.ml view.ml main.ml
+SOURCES = tama.ml view.ml view_gui.ml main.ml
 
 CAMLC = ocamlc
 CAMLOPT = ocamlopt
 CAMLDEP = ocamldep
 
+INCLUDES = -I /Users/agrumbac/.opam/system/lib/lablgtk2
 
-LIBS= $(WITHGRAPICS) $(WITHUNIX) 
+LIBS= $(WITHGRAPICS) $(WITHUNIX) $(WITHGTK)
 WITHGRAPICS = graphics.cma -cclib -lGraphics
 WITHUNIX = unix.cma
+WITHGTK = lablgtk.cma
 
 all: .depend $(NAME)
 
@@ -35,22 +37,22 @@ OBJS = $(SOURCES:.ml=.cmo)
 OPTOBJS = $(SOURCES:.ml=.cmx)
 
 $(NAME).byt: $(OBJS)
-	$(CAMLC) -o $(NAME).byt $(LIBS) $(OBJS)
+	$(CAMLC) $(INCLUDES) -o $(NAME).byt $(LIBS) $(OBJS)
 
 $(NAME).opt: $(OPTOBJS)
-	$(CAMLOPT) -o $(NAME).opt $(LIBS:.cma=.cmxa) $(OPTOBJS)
+	$(CAMLOPT) $(INCLUDES) -o $(NAME).opt $(LIBS:.cma=.cmxa) $(OPTOBJS)
 
 .SUFFIXES:
 .SUFFIXES: .ml .mli .cmo .cmi .cmx
 
 .ml.cmo:
-	$(CAMLC) -c $<
+	$(CAMLC) $(INCLUDES) -c $<
 
 .mli.cmi:
-	$(CAMLC) -c $<
+	$(CAMLC) $(INCLUDES) -c $<
 
 .ml.cmx:
-	$(CAMLOPT) -c $<
+	$(CAMLOPT) $(INCLUDES) -c $<
 
 clean:
 	rm -f *.cm[iox]
