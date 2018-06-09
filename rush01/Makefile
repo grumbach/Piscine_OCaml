@@ -6,21 +6,22 @@
 #    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/05/31 15:22:28 by agrumbac          #+#    #+#              #
-#    Updated: 2018/06/09 20:03:49 by agrumbac         ###   ########.fr        #
+#    Updated: 2018/06/09 23:54:37 by mgrimald         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = tama
 
-SOURCES = tama.ml view.ml view_gui.ml main.ml
-
+SOURCES = tama.ml view.ml  main.ml
+#view_gui.ml
 CAMLC = ocamlc
 CAMLOPT = ocamlopt
 CAMLDEP = ocamldep
 
-INCLUDES = -I /Users/agrumbac/.opam/system/lib/lablgtk2
+#INCLUDES = -I /Users/$(USER)/.opam/system/lib/lablgtk2
 
-LIBS= $(WITHGRAPICS) $(WITHUNIX) $(WITHGTK)
+LIBS= $(WITHGRAPICS) $(WITHUNIX) 
+#$(WITHGTK)
 WITHGRAPICS = graphics.cma -cclib -lGraphics
 WITHUNIX = unix.cma
 WITHGTK = lablgtk.cma
