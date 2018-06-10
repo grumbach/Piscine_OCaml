@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/08 23:07:10 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/09 00:02:36 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/10 13:14:43 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -25,7 +25,7 @@ module type GRAPHIC_INTERFACE =
 	end
 
 
-module type USER_INTERFACE = 
+module type USER_INTERFACE =
 	sig
 		val main : unit -> unit
 		val apply_action : action -> Tama.TamaMonad.t -> float -> Tama.TamaMonad.t
@@ -41,7 +41,7 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 		let apply_action act tama_t delta_seconds =
 			let bind_tama_t fct =
 				Tama.TamaMonad.apply
-				(					
+				(
 					Tama.TamaMonad.apply
 					(
 						Tama.TamaMonad.bind
@@ -63,17 +63,17 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 			| Load		-> bind_tama_t (Tama.TamaMonad.recover_from "./save.itama_1")
 			| Retry 	-> bind_tama_t (fun x -> Tama.TamaMonad.return (new Tama.pet 100 100 100 100))
 			| _			-> bind_tama_t Tama.TamaMonad.return
-		
+
 		let main () =
-			let rec main_loop tama_t prev_sec display_action = 
-				let tama_t = 
+			let rec main_loop tama_t prev_sec display_action =
+				let tama_t =
 					Tama.TamaMonad.apply tama_t (fun x -> Graphic_Interface.draw display_action x)
 				in let sec 	= Graphic_Interface.getTime () in
 				let action 	= Graphic_Interface.get_action () 	in
 				match action with
 				| Exit -> Graphic_Interface.draw_exit ()
-				| _ -> 
-					main_loop 
+				| _ ->
+					main_loop
 					(
 						apply_action
 						(
@@ -81,13 +81,13 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 						)
 						tama_t
 						(sec -. prev_sec)
-					) 
+					)
 					(
 						if (sec -. prev_sec < 1.) then prev_sec else sec
 					)
 					(
 						let choose_display_action action display_action =
-							match action with 
+							match action with
 								| Eat 		-> Eat
 								| Thunder	-> Thunder
 								| Bath		-> Bath
@@ -96,10 +96,10 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 								| _ 		-> display_action
 						in choose_display_action action display_action
 					)
-		in 
-			try 
-				Graphic_Interface.init () ; main_loop (Tama.TamaMonad.auto_load ()) (Graphic_Interface.getTime ()) Waiting	
-			with 
+		in
+			try
+				Graphic_Interface.init () ; main_loop (Tama.TamaMonad.auto_load ()) (Graphic_Interface.getTime ()) Waiting
+			with
 			| Graphics.Graphic_failure _ -> prerr_endline "Very very funny. Have a day!\n"
 			| _ -> prerr_endline "Something went wrong, plz contact mgrimald or agrumbac and explain exactly WHAT you were doing\nAnyway, have a good day :)"
 	end
@@ -111,40 +111,32 @@ module Graphics : GRAPHIC_INTERFACE =
 
 		let init () = Graphics.open_graph "" ; Graphics.set_window_title "tamagochiii <3" ; Graphics.auto_synchronize false
 
-		let draw_exit () = 
-			(	
+		let draw_exit () =
+			(
 				try
 					Graphics.resize_window 1600 1200 ; Graphics.clear_graph () ;
 					Graphics.set_color Graphics.black;
 					Graphics.fill_rect 0 0 (Graphics.size_x ()) (Graphics.size_y ()) ;
 					Graphics.set_color Graphics.white;
 					let x = Graphics.size_x ()
-						and y = Graphics.size_y () 
+						and y = Graphics.size_y ()
 					in
-					Graphics.moveto (x / 3) (y / 6) ; 
+					Graphics.moveto (x / 3) (y / 6) ;
 					Graphics.draw_string "Made With Salt, Wounds, Salt On Open Wounds and Cries." ;
 					Graphics.synchronize ();
 					ignore (Graphics.wait_next_event [ Graphics.Button_up ])
-				with 
+				with
 					| _ -> ()
 			) ;  print_endline "Goodbye. Hope you enjoyed this little game"
 
-		let draw_pika x y pika (action:action) = 
-			(*Graphics.fill_rect (x / 4) (y / 3) (x / 4) ((y / 3)/2)	;
-			Graphics.fill_circle ((x * 2) / 9) ((y * 1) / 3) ((70)/2)	;
-			Graphics.fill_circle ((x * 7) / 9) ((y * 1) / 3) ((70)	/2);
-			Graphics.set_color Graphics.black ;
-			Graphics.fill_circle ((x * 2) / 6) ((y * 1) / 3 - 30) ((70)/2)	;
-			Graphics.fill_circle ((x * 4) / 6) ((y * 1) / 3 - 30) ((70)/2)	;
-			Graphics.fill_rect ((x * 2) / 6) (y * 2/ 5) (x - (x * 2) / 12) ((y / 10)/2)	;
-			Graphics.set_color Graphics.white	;*)
-			if pika#is_dead then TryHard.draw_image TryHard.dead   (x / 7) (y * 2 / 7)  
+		let draw_pika x y pika (action:action) =
+			if pika#is_dead then TryHard.draw_image TryHard.dead   (x / 7) (y * 2 / 7)
 			else match action with
-				| Eat 		 -> TryHard.draw_image TryHard.eat     (x / 3)  (y / 4)  
-				| Thunder 	 -> TryHard.draw_image TryHard.thunder (x / 4) 5  
-				| Bath		 -> TryHard.draw_image TryHard.bath    (x / 3) (y / 3)   
-				| Kill		 -> TryHard.draw_image TryHard.kill    (x / 3) (y / 4 + 25)  
-				| _ 		 -> TryHard.draw_image TryHard.hello   (x / 4) (25)  
+				| Eat 		 -> TryHard.draw_image TryHard.eat     (x / 3) (y / 4 + 25)
+				| Thunder 	 -> TryHard.draw_image TryHard.thunder (x / 3) (y / 4)
+				| Bath		 -> TryHard.draw_image TryHard.bath    (x / 3) (y / 4 + 25)
+				| Kill		 -> TryHard.draw_image TryHard.kill    (x / 3) (y / 4 + 25)
+				| _ 		 -> TryHard.draw_image TryHard.hello   (x / 3) (y / 4 + 25)
 
 
 		let draw_hud x y health energy hygiene happiness  =
@@ -183,47 +175,47 @@ module Graphics : GRAPHIC_INTERFACE =
 
 			(* TODO progress bar  *)
 
-		let draw_buttons x y tama = 
-			let draw_b x y dx dy str = 
-				Graphics.draw_rect x y dx dy ; 
+		let draw_buttons x y tama =
+			let draw_b x y dx dy str =
+				Graphics.draw_rect x y dx dy ;
 				Graphics.moveto (x + (dx) / 3) (y + (dy /2));
 				Graphics.draw_string str
 			in
 			if (tama#is_dead <> true) then (
 				draw_b (x * 4 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Kill"		;
-				draw_b (x * 3 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Bath"		;	
+				draw_b (x * 3 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Bath"		;
 				draw_b (x / 6) (y / 6 + 20) (x / 7) (y / 12) 		"Eat"		;
 				draw_b (x * 2 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Thunder")
 			;
 			draw_b (x * 3 / 6) (y / 12) (x / 7) (y / 12) 		"Load"		;
 			draw_b (x * 4 / 6) (y / 12) (x / 7) (y / 12) 		"Exit"		;
 			draw_b (x * 2 / 6) (y / 12) (x / 7) (y / 12) 		"Retry"		;
-			draw_b (x / 6) (y / 12) (x / 7) (y / 12) 			"Save"		
+			draw_b (x / 6) (y / 12) (x / 7) (y / 12) 			"Save"
 
-		let draw action tama = 
+		let draw action tama =
 			Graphics.resize_window 1600 1200 ; Graphics.clear_graph () ;
 			Graphics.set_color Graphics.black;
 					Graphics.fill_rect 0 0 (Graphics.size_x ()) (Graphics.size_y ()) ;
 					Graphics.set_color Graphics.white;
 			draw_pika (Graphics.size_x ()) (Graphics.size_y ()) tama action ;
 			let (health, energy, hygiene, happiness) = tama#return_data_tuple in
-			draw_hud (Graphics.size_x ()) (Graphics.size_y ()) health energy hygiene happiness  
-			; 
+			draw_hud (Graphics.size_x ()) (Graphics.size_y ()) health energy hygiene happiness
+			;
 			draw_buttons (Graphics.size_x ()) (Graphics.size_y ()) tama
 			;
 			Graphics.synchronize () ;
 			Tama.TamaMonad.return tama
 
 		let get_action () =
-			let s = Graphics.wait_next_event [ Graphics.Poll ] in 
+			let s = Graphics.wait_next_event [ Graphics.Poll ] in
 			if (s.button) then
 			begin
 				let s = Graphics.wait_next_event [ Graphics.Button_up ] in
-				let x = (Graphics.size_x ()) 
+				let x = (Graphics.size_x ())
 					and y = (Graphics.size_y ())
 				in
 				let verif vx vy x1 y1 x2 y2 =
-					(vx >= x1 && vx <= x1 + x2) && (vy >= y1 && vy <= y1 + y2) 
+					(vx >= x1 && vx <= x1 + x2) && (vy >= y1 && vy <= y1 + y2)
 				in
 				 match (s.mouse_x, s.mouse_y) with
 				| (vx,vy) when verif vx vy (x / 6) (y / 12) (x / 7) (y / 12) 			-> Save
@@ -248,8 +240,8 @@ module Shell : GRAPHIC_INTERFACE =
 
 		let init () = ()
 
-		let draw_pika tama action = 
-			if tama#is_dead then print_endline "\nTAMA IS DED, like, soooo DED\n" else 
+		let draw_pika tama action =
+			if tama#is_dead then print_endline "\nTAMA IS DED, like, soooo DED\n" else
 			(
 				print_endline "       ,___          .-;'";
 				print_endline "       `\"-.`\\_...._/`.`";
@@ -264,16 +256,16 @@ module Shell : GRAPHIC_INTERFACE =
 				print_endline "          \\    /   <";
 				print_endline "           '. <`'-,_)";
 				print_endline "            '._)";
-			
+
 			match action with
 				| Eat 		 -> print_endline "[Eat]"
 				| Thunder 	 -> print_endline "[Thunder]"
 				| Bath		 -> print_endline "[Bath]"
 				| Kill		 -> print_endline "[Kill]"
 				| _ 		 -> print_endline "[None]"
-			) 
+			)
 
-		let draw action tama = 
+		let draw action tama =
 			let (health, energy, hygiene, happiness) = tama#return_data_tuple in
 			print_endline ("health[" ^ (string_of_int health) ^ "]" ^
 						"energy[" ^ (string_of_int energy) ^ "]" ^
@@ -282,8 +274,8 @@ module Shell : GRAPHIC_INTERFACE =
 			draw_pika tama action ;
 			Tama.TamaMonad.return tama
 
-		let get_action () = 
-			try 
+		let get_action () =
+			try
 				print_endline "Available actions : ";
 				print_endline "\teat  - bath - kill - thunder";
 				print_endline "\texit - save - load - retry";
@@ -293,7 +285,7 @@ module Shell : GRAPHIC_INTERFACE =
 						)
 					)
 				with
-				| "eat" 	-> Eat 
+				| "eat" 	-> Eat
 				| "thunder" -> Thunder
 				| "bath"	-> Bath
 				| "kill"	-> Kill
@@ -303,7 +295,7 @@ module Shell : GRAPHIC_INTERFACE =
 				| "exit"	-> Exit
 				| x 		-> Waiting
 			with
-			| _ 			-> Waiting 
+			| _ 			-> Waiting
 
 		let draw_exit () = print_endline "Goodbye. Hope you enjoyed"
 
