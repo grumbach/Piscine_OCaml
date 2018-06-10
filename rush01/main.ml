@@ -13,4 +13,7 @@
 (* this is the base controller *)
 
 let () =
-	View.Graphics_User_Interface.main ()
+	if (true) then
+		View.Graphics_User_Interface.main ()
+	else
+		View.Shell_User_Interface.main ()

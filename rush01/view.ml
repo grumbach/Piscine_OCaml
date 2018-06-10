@@ -44,7 +44,8 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 				(					
 					Tama.TamaMonad.bind
 					(
-						Tama.TamaMonad.bind tama_t
+						Tama.TamaMonad.bind
+						tama_t
 						(
 							Tama.TamaMonad.decrease_health_by_n delta_seconds
 						)
@@ -60,7 +61,7 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 			| Kill		-> bind_tama_t Tama.TamaMonad.kill
 			| Save		-> bind_tama_t (Tama.TamaMonad.backup_to "./save.itama_1")
 			| Load		-> bind_tama_t (Tama.TamaMonad.recover_from "./save.itama_1")
-			| Retry 	-> bind_tama_t (fun (x:Tama.pet) -> Tama.TamaMonad.return (new Tama.pet 100 100 100 100))
+			| Retry 	-> Tama.TamaMonad.return (new Tama.pet 100 100 100 100)
 			| _			-> bind_tama_t Tama.TamaMonad.return
 		
 		let main () = 
@@ -146,16 +147,16 @@ module Graphics : GRAPHIC_INTERFACE =
 
 
 		let get_action () =
-			let s = Graphics.wait_next_event [ Graphics.Button_up (*; Graphics.Poll *)] in 
-			if (s.button = false) then begin
+			let s = Graphics.wait_next_event [ Graphics.Poll ] in 
+			if (s.button) then
+			begin
+				let s = Graphics.wait_next_event [ Graphics.Button_up ] in
 				let x = (Graphics.size_x ()) 
 					and y = (Graphics.size_y ())
 				in
 				let verif vx vy x1 y1 x2 y2 =
-					let t = (vx >= x1 && vx <= x1 + x2) && (vy >= y1 && vy <= y1 + y2)
-					in if t then print_endline ((string_of_int vx) ^ " ") ;
-					t 
-				in print_int x ; print_char '\t' ; print_int y ; print_endline "" ;
+					(vx >= x1 && vx <= x1 + x2) && (vy >= y1 && vy <= y1 + y2) 
+				in
 				 match (s.mouse_x, s.mouse_y) with
 				| (vx,vy) when verif vx vy (x / 6) (y / 12) (x / 7) (y / 12) 			-> Save
 				| (vx,vy) when verif vx vy (x / 6) (y / 6 + 20) (x / 7) (y / 12) 		-> Eat
@@ -165,7 +166,7 @@ module Graphics : GRAPHIC_INTERFACE =
 				| (vx,vy) when verif vx vy (x * 3 / 6) (y / 6 + 20) (x / 7) (y / 12) 	-> Bath
 				| (vx,vy) when verif vx vy (x * 4 / 6) (y / 12) (x / 7) (y / 12) 		-> Exit
 				| (vx,vy) when verif vx vy (x * 4 / 6) (y / 6 + 20) (x / 7) (y / 12) 	-> Kill
-				| _ -> print_endline "d ";  Waiting
+				| _ -> Waiting
 			end
 			else
 				Waiting
@@ -181,7 +182,9 @@ module Shell : GRAPHIC_INTERFACE =
 
 		let init () = ()
 
-		let draw_pika () = 
+		let draw_pika tama = 
+			if tama#is_dead then print_endline "TAMA IS DED, like, soooo DED" else 
+			(
 				print_endline "       ,___          .-;'";
 				print_endline "       `\"-.`\\_...._/`.`";
 				print_endline "    ,      \\        /";
@@ -195,23 +198,21 @@ module Shell : GRAPHIC_INTERFACE =
 				print_endline "          \\    /   <";
 				print_endline "           '. <`'-,_)";
 				print_endline "            '._)"
-
+			)
 		let draw tama = 
-			if tama#is_dead then print_endline "TAMA IS DED, like, soooo DED" else draw_pika () ;
 			let (health, energy, hygiene, happiness) = tama#return_data_tuple in
-			print_string "health[" ; print_int health; print_endline "]" ;
-			print_string "energy[" ; print_int energy; print_endline "]" ;
-			print_string "hygiene[" ; print_int hygiene; print_endline "]" ;
-			print_string "happiness[" ; print_int happiness; print_endline "]" ;
-			; Tama.TamaMonad.return tama
+			print_endline ("health[" ^ (string_of_int health) ^ "]" ^
+						"energy[" ^ (string_of_int energy) ^ "]" ^
+						"hygiene[" ^ (string_of_int hygiene) ^ "]" ^
+						"happiness[" ^ (string_of_int happiness) ^ "]") ;
+			draw_pika tama ;
+			Tama.TamaMonad.return tama
 
 		let get_action () = 
 			try 
-
 				print_endline "Available actions : ";
 				print_endline "\teat  - bath - kill - thunder";
 				print_endline "\texit - save - load - retry";
-
 				match String.lowercase_ascii (
 						String.trim (
 							read_line ()

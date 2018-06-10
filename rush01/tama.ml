@@ -97,6 +97,11 @@ struct
 		| Alive tama -> f tama
 		| Dead -> bind (f (new pet 0 0 0 0)) return
 
+	let applyResurect x (f:pet -> t) =
+		match x with
+		| Alive tama -> f tama
+		| Dead -> bind (f (new pet 100 100 100 100)) return
+
 (* ------------------------- methods ---------------------------------------- *)
 
 	let eat (tama:pet) :t =
