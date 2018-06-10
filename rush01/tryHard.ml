@@ -10,7 +10,7 @@ let lire_image_ppm name =
        in
        match String.split_on_char ' ' ( loop (input_line fd) ) with
        | head::second::[] -> (int_of_string head , int_of_string second)
-       | _ -> failwith ("couldn't parse line")
+       | _ -> (*failwith ("couldn't parse line") ; *) (0, 0)
 
    (* lecture de la ligne contenant 255 *)
    and _ = input_line fd
@@ -45,13 +45,9 @@ let lire_image_ppm name =
 let draw_image img x y = 
     Graphics.draw_image (Graphics.make_image img) x y
 
-let initialyse_window () = 
+let sample_code () = 
     Graphics.open_graph " 1400x900";
     try 
     let image = (lire_image_ppm "./textures/bath.ppm") in
-    draw_image image 0 0 ; let c = Graphics.read_key () in ()
+    draw_image image 0 0 ; ignore(Graphics.read_key ())
     with e -> prerr_endline " image not found"
-    
-
-
-(*let () = initialyse_window ()*)

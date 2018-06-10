@@ -85,7 +85,12 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 					(
 						if (sec -. prev_sec < 1.) then prev_sec else sec
 					)
-		in Graphic_Interface.init () ; main_loop (Tama.TamaMonad.auto_load ()) (Graphic_Interface.getTime ())	
+		in 
+			try 
+				Graphic_Interface.init () ; main_loop (Tama.TamaMonad.auto_load ()) (Graphic_Interface.getTime ())	
+			with 
+			| Graphics.Graphic_failure _ -> prerr_endline "Very very funny. Have a day!\n"
+			| _ -> prerr_endline "Something went wrong, plz contact mgrimald or agrumbac and explain exactly WHAT you were doing\nAnyway, have a good day"
 	end
 
 
@@ -94,6 +99,21 @@ module Graphics : GRAPHIC_INTERFACE =
 		let getTime () = Unix.gettimeofday ()
 
 		let init () = Graphics.open_graph "" ; Graphics.set_window_title "tamagochiii <3" ; Graphics.auto_synchronize false
+
+		let draw_exit () = 
+			(	
+				try
+					Graphics.resize_window 1200 1000 ; Graphics.clear_graph () ;
+					let x = Graphics.size_x ()
+						and y = Graphics.size_y () 
+					in
+					Graphics.moveto (x / 3) (y / 6) ; 
+					Graphics.draw_string "Made With Salt, Wounds, Salt On Open Wounds and Cries." ;
+					Graphics.synchronize ();
+					ignore (Graphics.wait_next_event [ Graphics.Button_up ])
+				with 
+					| _ -> ()
+			) ;  print_endline "Goodbye. Hope you enjoyed this little game"
 
 		let draw_pika x y = 
 			Graphics.fill_rect (x / 4) (y / 3) (x / 2) (y / 3)	;
@@ -170,8 +190,6 @@ module Graphics : GRAPHIC_INTERFACE =
 			end
 			else
 				Waiting
-
-		let draw_exit () = print_endline "Goodbye. Hope you enjoyed"
 
 	end
 
