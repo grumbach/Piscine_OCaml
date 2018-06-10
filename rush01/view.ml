@@ -148,14 +148,39 @@ module Graphics : GRAPHIC_INTERFACE =
 
 
 		let draw_hud x y health energy hygiene happiness  =
-			Graphics.moveto (x / 7) (y - (y / 6)) ;
+			Graphics.moveto (x / 7) ((5 * y) / 6) ;
 			Graphics.draw_string ("health: " ^ (string_of_int health)) ;
-			Graphics.rmoveto (x / 7) 0 ;
+
+			Graphics.draw_rect (x / 7) ((6 * y) / 7) (x / 21) (y / 8);
+			if (health < 25) then Graphics.set_color Graphics.red ;
+			Graphics.fill_rect (x / 7) ((6 * y) / 7) (x / 21) ((y * health) / (8 * 100));
+			Graphics.set_color Graphics.white ;
+
+			Graphics.moveto (2*x / 7) (y - (y / 6)) ;
 			Graphics.draw_string ("energy: " ^ (string_of_int energy)) ;
-			Graphics.rmoveto (x / 7) 0 ;
+
+			Graphics.draw_rect (2*x / 7) ((6 * y) / 7) (x / 21) ((y * 100) / (8 * 100));
+			if (energy < 25) then Graphics.set_color Graphics.red ;
+			Graphics.fill_rect (2*x / 7) ((6 * y) / 7) (x / 21) ((y * energy) / (8 * 100));
+			Graphics.set_color Graphics.white ;
+
+			Graphics.moveto (3* x / 7) (y - (y / 6)) ;
 			Graphics.draw_string ("hygiene: " ^ (string_of_int hygiene)) ;
-			Graphics.rmoveto (x / 7) 0 ;
-			Graphics.draw_string ("happiness: " ^ (string_of_int happiness)) 
+
+			Graphics.draw_rect (3*x / 7) ((6 * y) / 7) (x / 21) ((y * 100) / (8 * 100));
+			if (hygiene < 25) then Graphics.set_color Graphics.red ;
+			Graphics.fill_rect (3*x / 7) ((6 * y) / 7) (x / 21) ((y * hygiene) / (8 * 100));
+			Graphics.set_color Graphics.white ;
+
+
+			Graphics.moveto (5* x / 7) (y - (y / 6)) ;
+			Graphics.draw_string ("happiness: " ^ (string_of_int happiness));
+
+			Graphics.draw_rect (5*x / 7) ((6 * y) / 7) (x / 21) ((y) / (8));
+			if (happiness < 25) then Graphics.set_color Graphics.red ;
+			Graphics.fill_rect (5*x / 7) ((6 * y) / 7) (x / 21) ((y * happiness) / (8 * 100)) ;
+			Graphics.set_color Graphics.white
+
 			(* TODO progress bar  *)
 
 		let draw_buttons x y = 
