@@ -6,7 +6,7 @@
 (*   By: mgrimald <mgrimald@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/10 13:38:34 by mgrimald          #+#    #+#             *)
-(*   Updated: 2018/06/10 13:38:52 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/10 14:32:30 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -63,6 +63,8 @@ let eat =     lire_image_ppm "./textures/eat.ppm"
 let hello =   lire_image_ppm "./textures/hello.ppm"
 let kill =    lire_image_ppm "./textures/kill.ppm"
 let thunder = lire_image_ppm "./textures/thunder.ppm"
+let dance = lire_image_ppm "./textures/dance.ppm"
+let rest = lire_image_ppm "./textures/rest.ppm"
 
 let draw_image img x y =
     Graphics.draw_image (Graphics.make_image img) x y

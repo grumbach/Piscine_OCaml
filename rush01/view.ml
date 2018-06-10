@@ -6,13 +6,13 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/08 23:07:10 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/10 13:14:43 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/10 14:43:48 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
 (* this manages the view *)
 
-type action = Eat | Thunder | Bath | Kill | Waiting | Retry | Save | Load | Exit
+type action = Dance | Rest | Eat | Thunder | Bath | Kill | Waiting | Retry | Save | Load | Exit
 
 
 module type GRAPHIC_INTERFACE =
@@ -57,6 +57,8 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 			match act with
 			| Eat 		-> bind_tama_t Tama.TamaMonad.eat
 			| Thunder	-> bind_tama_t Tama.TamaMonad.thunder
+			| Dance		-> bind_tama_t Tama.TamaMonad.dance
+			| Rest		-> bind_tama_t Tama.TamaMonad.rest
 			| Bath		-> bind_tama_t Tama.TamaMonad.bath
 			| Kill		-> bind_tama_t Tama.TamaMonad.kill
 			| Save		-> bind_tama_t (Tama.TamaMonad.backup_to "./save.itama_1")
@@ -90,6 +92,8 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 							match action with
 								| Eat 		-> Eat
 								| Thunder	-> Thunder
+								| Dance		-> Dance
+								| Rest		-> Rest
 								| Bath		-> Bath
 								| Kill		-> Kill
 								| Retry | Load -> Waiting
@@ -134,6 +138,8 @@ module Graphics : GRAPHIC_INTERFACE =
 			else match action with
 				| Eat 		 -> Parse_textures.draw_image Parse_textures.eat     (x / 3) (y / 4 + 25)
 				| Thunder 	 -> Parse_textures.draw_image Parse_textures.thunder (x / 3) (y / 4)
+				| Dance 	 -> Parse_textures.draw_image Parse_textures.dance   (x / 3) (y / 4 + 25)
+				| Rest	 	 -> Parse_textures.draw_image Parse_textures.rest    (x / 3) (y / 4 + 25)
 				| Bath		 -> Parse_textures.draw_image Parse_textures.bath    (x / 3) (y / 4 + 25)
 				| Kill		 -> Parse_textures.draw_image Parse_textures.kill    (x / 3) (y / 4 + 25)
 				| _ 		 -> Parse_textures.draw_image Parse_textures.hello   (x / 3) (y / 4 + 25)
@@ -182,15 +188,17 @@ module Graphics : GRAPHIC_INTERFACE =
 				Graphics.draw_string str
 			in
 			if (tama#is_dead <> true) then (
-				draw_b (x * 4 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Kill"		;
-				draw_b (x * 3 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Bath"		;
-				draw_b (x / 6) (y / 6 + 20) (x / 7) (y / 12) 		"Eat"		;
-				draw_b (x * 2 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Thunder")
+				draw_b (x * 1 / 8) (y / 6 + 20) (x / 9) (y / 12) 	"KILL"		;
+				draw_b (x * 2 / 8) (y / 6 + 20) (x / 9) (y / 12) 	"BATH"		;
+				draw_b (x * 3 / 8) (y / 6 + 20) (x / 9) (y / 12)	"EAT"		;
+				draw_b (x * 4 / 8) (y / 6 + 20) (x / 9) (y / 12) 	"THUNDER"	;
+				draw_b (x * 5 / 8) (y / 6 + 20) (x / 9) (y / 12) 	"DANCE"	;
+				draw_b (x * 6 / 8) (y / 6 + 20) (x / 9) (y / 12) 	"REST")
 			;
-			draw_b (x * 3 / 6) (y / 12) (x / 7) (y / 12) 		"Load"		;
-			draw_b (x * 4 / 6) (y / 12) (x / 7) (y / 12) 		"Exit"		;
-			draw_b (x * 2 / 6) (y / 12) (x / 7) (y / 12) 		"Retry"		;
-			draw_b (x / 6) (y / 12) (x / 7) (y / 12) 			"Save"
+			draw_b (x * 3 / 6) (y / 12) (x / 7) (y / 12) 		"LOAD"		;
+			draw_b (x * 4 / 6) (y / 12) (x / 7) (y / 12) 		"EXIT"		;
+			draw_b (x * 2 / 6) (y / 12) (x / 7) (y / 12) 		"RETRY"		;
+			draw_b (x / 6) (y / 12) (x / 7) (y / 12) 			"SAVE"
 
 		let draw action tama =
 			Graphics.resize_window 1600 1200 ; Graphics.clear_graph () ;
@@ -218,14 +226,16 @@ module Graphics : GRAPHIC_INTERFACE =
 					(vx >= x1 && vx <= x1 + x2) && (vy >= y1 && vy <= y1 + y2)
 				in
 				 match (s.mouse_x, s.mouse_y) with
+				 | (vx,vy) when verif vx vy (x * 1 / 8) (y / 6 + 20) (x / 9) (y / 12) 	-> Kill
+				 | (vx,vy) when verif vx vy (x * 2 / 8) (y / 6 + 20) (x / 9) (y / 12) 	-> Bath
+				 | (vx,vy) when verif vx vy (x * 3 / 8) (y / 6 + 20) (x / 9) (y / 12)	-> Eat
+				 | (vx,vy) when verif vx vy (x * 4 / 8) (y / 6 + 20) (x / 9) (y / 12) 	-> Thunder
+				 | (vx,vy) when verif vx vy (x * 5 / 8) (y / 6 + 20) (x / 9) (y / 12) 	-> Dance
+				 | (vx,vy) when verif vx vy (x * 6 / 8) (y / 6 + 20) (x / 9) (y / 12) 	-> Rest
 				| (vx,vy) when verif vx vy (x / 6) (y / 12) (x / 7) (y / 12) 			-> Save
-				| (vx,vy) when verif vx vy (x / 6) (y / 6 + 20) (x / 7) (y / 12) 		-> Eat
 				| (vx,vy) when verif vx vy (x * 2 / 6) (y / 12) (x / 7) (y / 12) 		-> Retry
-				| (vx,vy) when verif vx vy (x * 2 / 6) (y / 6 + 20) (x / 7) (y / 12) 	-> Thunder
 				| (vx,vy) when verif vx vy (x * 3 / 6) (y / 12) (x / 7) (y / 12) 		-> Load
-				| (vx,vy) when verif vx vy (x * 3 / 6) (y / 6 + 20) (x / 7) (y / 12) 	-> Bath
 				| (vx,vy) when verif vx vy (x * 4 / 6) (y / 12) (x / 7) (y / 12) 		-> Exit
-				| (vx,vy) when verif vx vy (x * 4 / 6) (y / 6 + 20) (x / 7) (y / 12) 	-> Kill
 				| _ -> Waiting
 			end
 			else
@@ -260,6 +270,8 @@ module Shell : GRAPHIC_INTERFACE =
 			match action with
 				| Eat 		 -> print_endline "[Eat]"
 				| Thunder 	 -> print_endline "[Thunder]"
+				| Dance 	 -> print_endline "[Dance]"
+				| Rest	 	 -> print_endline "[Rest]"
 				| Bath		 -> print_endline "[Bath]"
 				| Kill		 -> print_endline "[Kill]"
 				| _ 		 -> print_endline "[None]"
@@ -277,7 +289,7 @@ module Shell : GRAPHIC_INTERFACE =
 		let get_action () =
 			try
 				print_endline "Available actions : ";
-				print_endline "\teat  - bath - kill - thunder";
+				print_endline "\teat  - bath - kill - thunder - dance - rest";
 				print_endline "\texit - save - load - retry";
 				match String.lowercase_ascii (
 						String.trim (
@@ -287,6 +299,8 @@ module Shell : GRAPHIC_INTERFACE =
 				with
 				| "eat" 	-> Eat
 				| "thunder" -> Thunder
+				| "rest"    -> Rest
+				| "dance"   -> Dance
 				| "bath"	-> Bath
 				| "kill"	-> Kill
 				| "save"	-> Save
@@ -309,6 +323,6 @@ module Graphics_User_Interface : USER_INTERFACE = Make_User_Interface (Graphics)
 In this part you must provide sufficient functionnality to demonstrate your almighty power in OCaml.
 • Your program must draw a wibbily wobbly timey wimey creature on the main screen
 • You must also draw basic meters : health, hygiene, energy, happyness (you’re free to draw it as you like but it must remain consistent with the concept.)
-• You must also draw basic button/area to allow the end user to select an action to perform : EAT, THUNDER, BATH, KILL
+• You must also draw basic button/area to allow the end user to select an action to perform : EAT, THUNDER, BATH, KILL, DANCE, REST
 
 *)

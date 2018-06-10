@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/08 23:06:57 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/09 15:11:35 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/10 14:33:02 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -18,21 +18,21 @@ class pet initial_Health initial_Energy initial_Hygiene initial_Happiness =
 		val _Health:int = match initial_Health with
 			| x when x > 100	 -> 100
 			| x when x < 0 		 -> 0
-			| x 				 -> x 
+			| x 				 -> x
 		val _Energy:int = match initial_Energy with
 			| x when x > 100	 -> 100
 			| x when x < 0 		 -> 0
-			| x 				 -> x 
+			| x 				 -> x
 
 		val _Hygiene:int = match initial_Hygiene with
 			| x when x > 100	 -> 100
 			| x when x < 0 		 -> 0
-			| x 				 -> x 
+			| x 				 -> x
 
 		val _Happiness:int = match initial_Happiness with
 			| x when x > 100	 -> 100
 			| x when x < 0 		 -> 0
-			| x 				 -> x 
+			| x 				 -> x
 
 
 		method eat =
@@ -48,6 +48,20 @@ class pet initial_Health initial_Energy initial_Hygiene initial_Happiness =
 				(_Energy + 25)
 				_Hygiene
 				(_Happiness - 20)
+
+		method rest =
+			new pet
+				(_Health + 10)
+				(_Energy + 10)
+				(_Hygiene - 30)
+				(_Happiness+ 10)
+
+		method dance =
+			new pet
+				(_Health - 20)
+				(_Energy - 25)
+				_Hygiene
+				(_Happiness + 50)
 
 		method bath =
 			new pet
@@ -107,6 +121,14 @@ struct
 		let new_tama = tama#thunder in
 		if new_tama#is_dead then Dead else Alive new_tama
 
+	let rest (tama:pet) :t =
+		let new_tama = tama#rest in
+		if new_tama#is_dead then Dead else Alive new_tama
+
+	let dance (tama:pet) :t =
+		let new_tama = tama#dance in
+		if new_tama#is_dead then Dead else Alive new_tama
+
 	let bath (tama:pet) :t =
 		let new_tama = tama#bath in
 		if new_tama#is_dead then Dead else Alive new_tama
@@ -120,7 +142,7 @@ struct
 		if new_tama#is_dead then Dead else Alive new_tama
 
 	let decrease_health_by_n (n:float) (tama:pet)  :t =
-		let rec loop tama n = 
+		let rec loop tama n =
 			if (n >= 1.)
 			then loop tama#decrease_health_by_1 (n -. 1.)
 			else tama
@@ -149,7 +171,7 @@ struct
 		in
 		match return (new pet (hp) (en) (hy) (ha)) with
 		| Dead -> return (new pet 100 100 100 100)
-		| Alive x -> return x 
+		| Alive x -> return x
 
 	let auto_load () =
 		match recover_from "./save.itama" (new pet 0 0 0 0) with
