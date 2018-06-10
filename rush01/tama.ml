@@ -95,12 +95,7 @@ struct
 	let apply x (f:pet -> t) =
 		match x with
 		| Alive tama -> f tama
-		| Dead -> bind (f (new pet 0 0 0 0)) return
-
-	let applyResurect x (f:pet -> t) =
-		match x with
-		| Alive tama -> f tama
-		| Dead -> bind (f (new pet 100 100 100 100)) return
+		| Dead -> f (new pet 0 0 0 0)
 
 (* ------------------------- methods ---------------------------------------- *)
 
@@ -136,6 +131,7 @@ struct
 (* ------------------------- recover_from ----------------------------------- *)
 
 	let recover_from filename (tama:pet) =
+		prerr_endline "recover_from";
 		let (hp, en, hy, ha) =
 			try
 				let istream = open_in filename in
@@ -152,7 +148,9 @@ struct
 			with
 			| _ -> prerr_endline ("[TAMA hates you] failed opening: " ^ filename); (0, 0, 0, 0)
 		in
-		return (new pet (hp) (en) (hy) (ha))
+		match return (new pet (hp) (en) (hy) (ha)) with
+		| Dead -> return (new pet 100 100 100 100)
+		| Alive x -> return x 
 
 	let auto_load () =
 		match recover_from "./save.itama" (new pet 0 0 0 0) with
@@ -168,7 +166,7 @@ struct
 				let ostream = open_out filename in
 				try
 					let (hp, en, hy, ha) = tama#return_data_tuple in
-					Printf.fprintf ostream "%d %d %d %d\n" (hp) (en) (hy) (ha);
+					output_string ostream ((string_of_int hp) ^ " " ^ (string_of_int en) ^ " " ^ (string_of_int hy) ^ " " ^ (string_of_int ha) ^ "\n") ;
 					close_out ostream
 				with
 				| _ -> close_out ostream; prerr_endline ("[TAMA hates you] failed writing to: " ^ filename)

@@ -42,7 +42,7 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 			let bind_tama_t fct =
 				Tama.TamaMonad.apply
 				(					
-					Tama.TamaMonad.bind
+					Tama.TamaMonad.apply
 					(
 						Tama.TamaMonad.bind
 						tama_t
@@ -61,7 +61,7 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 			| Kill		-> bind_tama_t Tama.TamaMonad.kill
 			| Save		-> bind_tama_t (Tama.TamaMonad.backup_to "./save.itama_1")
 			| Load		-> bind_tama_t (Tama.TamaMonad.recover_from "./save.itama_1")
-			| Retry 	-> Tama.TamaMonad.return (new Tama.pet 100 100 100 100)
+			| Retry 	-> bind_tama_t (fun x -> Tama.TamaMonad.return (new Tama.pet 100 100 100 100))
 			| _			-> bind_tama_t Tama.TamaMonad.return
 		
 		let main () = 
