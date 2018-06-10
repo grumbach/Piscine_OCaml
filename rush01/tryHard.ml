@@ -25,14 +25,14 @@ let lire_image_ppm name =
           if (width - 1 >= j) then
           begin
             begin
-              img.(i).(j) <- 
+              img.(i).(j) <-
                 if bool_color then
                   let x = input_byte fd
                     and y = input_byte fd
                     and z = input_byte fd
                   in Graphics.rgb x y z
                 else
-                  let x = input_byte fd 
+                  let x = input_byte fd
                   in Graphics.rgb x x x
             end
             ;
@@ -42,8 +42,8 @@ let lire_image_ppm name =
     in loop_i 0 ;
     close_in fd ;
   img
-  with 
-  _ -> prerr_endline (name ^ " can not be used")  ; Array.make_matrix 0 0 (Graphics.rgb 0 0 0)
+  with
+  _ -> prerr_endline (name ^ " can not be used")  ; Array.make_matrix 100 100 (Graphics.rgb 0 0 0)
 
 let bath =    lire_image_ppm "./textures/bath.ppm"
 let dead =    lire_image_ppm "./textures/dead.ppm"
@@ -52,12 +52,12 @@ let hello =   lire_image_ppm "./textures/hello.ppm"
 let kill =    lire_image_ppm "./textures/kill.ppm"
 let thunder = lire_image_ppm "./textures/thunder.ppm"
 
-let draw_image img x y = 
+let draw_image img x y =
     Graphics.draw_image (Graphics.make_image img) x y
 
-let sample_code () = 
+let sample_code () =
     Graphics.open_graph " 1400x900";
-    try 
+    try
     let image = (lire_image_ppm "./textures/bath.ppm") in
     draw_image image 0 0 ; ignore(Graphics.read_key ())
     with e -> prerr_endline " image not found"
