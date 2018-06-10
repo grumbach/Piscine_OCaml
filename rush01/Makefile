@@ -12,7 +12,7 @@
 
 NAME = tama
 
-SOURCES = tama.ml view.ml  main.ml
+SOURCES = tryHard.ml tama.ml view.ml  main.ml
 #view_gui.ml
 CAMLC = ocamlc
 CAMLOPT = ocamlopt

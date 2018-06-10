@@ -92,7 +92,7 @@ module Graphics : GRAPHIC_INTERFACE =
 	struct
 		let getTime () = Unix.gettimeofday ()
 
-		let init () = Graphics.open_graph "" ; Graphics.set_window_title "tamagochiii <3"
+		let init () = Graphics.open_graph "" ; Graphics.set_window_title "tamagochiii <3" ; Graphics.auto_synchronize false
 
 		let draw_pika x y = 
 			Graphics.fill_rect (x / 4) (y / 3) (x / 2) (y / 3)	;
@@ -140,34 +140,35 @@ module Graphics : GRAPHIC_INTERFACE =
 			; 
 			draw_buttons (Graphics.size_x ()) (Graphics.size_y ())
 			;
+			Graphics.synchronize () ;
 			Tama.TamaMonad.return tama
 
 
 
-		let get_action () = 
-			try 
-
-				print_endline "Available actions : ";
-				print_endline "\teat  - bath - kill - thunder";
-				print_endline "\texit - save - load - retry";
-
-				match String.lowercase_ascii (
-						String.trim (
-							read_line ()
-						)
-					)
-				with
-				| "eat" 	-> Eat 
-				| "thunder" -> Thunder
-				| "bath"	-> Bath
-				| "kill"	-> Kill
-				| "save"	-> Save
-				| "retry"	-> Retry
-				| "load"	-> Load
-				| "exit"	-> Exit
-				| x 		-> Waiting
-			with
-			| _ 			-> Waiting 
+		let get_action () =
+			let s = Graphics.wait_next_event [ Graphics.Button_up (*; Graphics.Poll *)] in 
+			if (s.button = false) then begin
+				let x = (Graphics.size_x ()) 
+					and y = (Graphics.size_y ())
+				in
+				let verif vx vy x1 y1 x2 y2 =
+					let t = (vx >= x1 && vx <= x1 + x2) && (vy >= y1 && vy <= y1 + y2)
+					in if t then print_endline ((string_of_int vx) ^ " ") ;
+					t 
+				in print_int x ; print_char '\t' ; print_int y ; print_endline "" ;
+				 match (s.mouse_x, s.mouse_y) with
+				| (vx,vy) when verif vx vy (x / 6) (y / 12) (x / 7) (y / 12) 			-> Save
+				| (vx,vy) when verif vx vy (x / 6) (y / 6 + 20) (x / 7) (y / 12) 		-> Eat
+				| (vx,vy) when verif vx vy (x * 2 / 6) (y / 12) (x / 7) (y / 12) 		-> Retry
+				| (vx,vy) when verif vx vy (x * 2 / 6) (y / 6 + 20) (x / 7) (y / 12) 	-> Thunder
+				| (vx,vy) when verif vx vy (x * 3 / 6) (y / 12) (x / 7) (y / 12) 		-> Load
+				| (vx,vy) when verif vx vy (x * 3 / 6) (y / 6 + 20) (x / 7) (y / 12) 	-> Bath
+				| (vx,vy) when verif vx vy (x * 4 / 6) (y / 12) (x / 7) (y / 12) 		-> Exit
+				| (vx,vy) when verif vx vy (x * 4 / 6) (y / 6 + 20) (x / 7) (y / 12) 	-> Kill
+				| _ -> print_endline "d ";  Waiting
+			end
+			else
+				Waiting
 
 		let draw_exit () = print_endline "Goodbye. Hope you enjoyed"
 
