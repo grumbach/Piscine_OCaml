@@ -18,7 +18,7 @@ type action = Eat | Thunder | Bath | Kill | Waiting | Retry | Save | Load | Exit
 module type GRAPHIC_INTERFACE =
 	sig
 		val init : unit -> unit
-		val draw : Tama.pet -> Tama.TamaMonad.t
+		val draw : action -> Tama.pet -> Tama.TamaMonad.t
 		val get_action : unit -> action
 		val draw_exit : unit -> unit
 		val getTime : unit -> float
@@ -64,11 +64,11 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 			| Retry 	-> bind_tama_t (fun x -> Tama.TamaMonad.return (new Tama.pet 100 100 100 100))
 			| _			-> bind_tama_t Tama.TamaMonad.return
 		
-		let main () = 
-			let rec main_loop tama_t prev_sec = 
-				let tama_t 	= 
-					Tama.TamaMonad.apply tama_t Graphic_Interface.draw  ;
-				in let sec 	= Graphic_Interface.getTime () in 
+		let main () =
+			let rec main_loop tama_t prev_sec display_action = 
+				let tama_t = 
+					Tama.TamaMonad.apply tama_t (fun x -> Graphic_Interface.draw display_action x)
+				in let sec 	= Graphic_Interface.getTime () in
 				let action 	= Graphic_Interface.get_action () 	in
 				match action with
 				| Exit -> Graphic_Interface.draw_exit ()
@@ -78,16 +78,27 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 						apply_action
 						(
 							action
-						) 
+						)
 						tama_t
 						(sec -. prev_sec)
 					) 
 					(
 						if (sec -. prev_sec < 1.) then prev_sec else sec
 					)
+					(
+						let choose_display_action action display_action =
+							match action with 
+								| Eat 		-> Eat
+								| Thunder	-> Thunder
+								| Bath		-> Bath
+								| Kill		-> Kill
+								| Retry | Load -> Waiting
+								| _ 		-> display_action
+						in choose_display_action action display_action
+					)
 		in 
 			try 
-				Graphic_Interface.init () ; main_loop (Tama.TamaMonad.auto_load ()) (Graphic_Interface.getTime ())	
+				Graphic_Interface.init () ; main_loop (Tama.TamaMonad.auto_load ()) (Graphic_Interface.getTime ()) Waiting	
 			with 
 			| Graphics.Graphic_failure _ -> prerr_endline "Very very funny. Have a day!\n"
 			| _ -> prerr_endline "Something went wrong, plz contact mgrimald or agrumbac and explain exactly WHAT you were doing\nAnyway, have a good day :)"
@@ -103,7 +114,7 @@ module Graphics : GRAPHIC_INTERFACE =
 		let draw_exit () = 
 			(	
 				try
-					Graphics.resize_window 1200 1000 ; Graphics.clear_graph () ;
+					Graphics.resize_window 1600 1200 ; Graphics.clear_graph () ;
 					Graphics.set_color Graphics.black;
 					Graphics.fill_rect 0 0 (Graphics.size_x ()) (Graphics.size_y ()) ;
 					Graphics.set_color Graphics.white;
@@ -127,13 +138,13 @@ module Graphics : GRAPHIC_INTERFACE =
 			Graphics.fill_circle ((x * 4) / 6) ((y * 1) / 3 - 30) ((70)/2)	;
 			Graphics.fill_rect ((x * 2) / 6) (y * 2/ 5) (x - (x * 2) / 12) ((y / 10)/2)	;
 			Graphics.set_color Graphics.white	;*)
-			if pika#is_dead then TryHard.draw_image TryHard.dead  (x / 7) (y / 3)  
+			if pika#is_dead then TryHard.draw_image TryHard.dead   (x / 7) (y * 2 / 7)  
 			else match action with
-				| Eat 		 -> TryHard.draw_image TryHard.eat  x y  
-				| Thunder 	 -> TryHard.draw_image TryHard.thunder  x y  
-				| Bath		 -> TryHard.draw_image TryHard.bath  x y  
-				| Kill		 -> TryHard.draw_image TryHard.kill  x y  
-				| _ 		 -> TryHard.draw_image TryHard.hello  (x / 4) 25  
+				| Eat 		 -> TryHard.draw_image TryHard.eat     (x / 3)  (y / 4)  
+				| Thunder 	 -> TryHard.draw_image TryHard.thunder (x / 4) 5  
+				| Bath		 -> TryHard.draw_image TryHard.bath    (x / 3) (y / 3)   
+				| Kill		 -> TryHard.draw_image TryHard.kill    (x / 3) (y / 4 + 25)  
+				| _ 		 -> TryHard.draw_image TryHard.hello   (x / 4) (25)  
 
 
 		let draw_hud x y health energy hygiene happiness  =
@@ -162,14 +173,12 @@ module Graphics : GRAPHIC_INTERFACE =
 			draw_b (x * 4 / 6) (y / 12) (x / 7) (y / 12) 		"Exit"		;
 			draw_b (x * 4 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Kill"
 
-		let draw tama = 
+		let draw action tama = 
 			Graphics.resize_window 1600 1200 ; Graphics.clear_graph () ;
 			Graphics.set_color Graphics.black;
 					Graphics.fill_rect 0 0 (Graphics.size_x ()) (Graphics.size_y ()) ;
 					Graphics.set_color Graphics.white;
-					
-
-			draw_pika (Graphics.size_x ()) (Graphics.size_y ()) tama Waiting ;
+			draw_pika (Graphics.size_x ()) (Graphics.size_y ()) tama action ;
 			let (health, energy, hygiene, happiness) = tama#return_data_tuple in
 			draw_hud (Graphics.size_x ()) (Graphics.size_y ()) health energy hygiene happiness 
 			; 
@@ -177,8 +186,6 @@ module Graphics : GRAPHIC_INTERFACE =
 			;
 			Graphics.synchronize () ;
 			Tama.TamaMonad.return tama
-
-
 
 		let get_action () =
 			let s = Graphics.wait_next_event [ Graphics.Poll ] in 
@@ -214,8 +221,8 @@ module Shell : GRAPHIC_INTERFACE =
 
 		let init () = ()
 
-		let draw_pika tama = 
-			if tama#is_dead then print_endline "TAMA IS DED, like, soooo DED" else 
+		let draw_pika tama action = 
+			if tama#is_dead then print_endline "\nTAMA IS DED, like, soooo DED\n" else 
 			(
 				print_endline "       ,___          .-;'";
 				print_endline "       `\"-.`\\_...._/`.`";
@@ -229,15 +236,23 @@ module Shell : GRAPHIC_INTERFACE =
 				print_endline "       `-;     ,    /";
 				print_endline "          \\    /   <";
 				print_endline "           '. <`'-,_)";
-				print_endline "            '._)"
-			)
-		let draw tama = 
+				print_endline "            '._)";
+			
+			match action with
+				| Eat 		 -> print_endline "[Eat]"
+				| Thunder 	 -> print_endline "[Thunder]"
+				| Bath		 -> print_endline "[Bath]"
+				| Kill		 -> print_endline "[Kill]"
+				| _ 		 -> print_endline "[None]"
+			) 
+
+		let draw action tama = 
 			let (health, energy, hygiene, happiness) = tama#return_data_tuple in
 			print_endline ("health[" ^ (string_of_int health) ^ "]" ^
 						"energy[" ^ (string_of_int energy) ^ "]" ^
 						"hygiene[" ^ (string_of_int hygiene) ^ "]" ^
 						"happiness[" ^ (string_of_int happiness) ^ "]") ;
-			draw_pika tama ;
+			draw_pika tama action ;
 			Tama.TamaMonad.return tama
 
 		let get_action () = 
