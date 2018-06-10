@@ -183,20 +183,22 @@ module Graphics : GRAPHIC_INTERFACE =
 
 			(* TODO progress bar  *)
 
-		let draw_buttons x y = 
+		let draw_buttons x y tama = 
 			let draw_b x y dx dy str = 
 				Graphics.draw_rect x y dx dy ; 
 				Graphics.moveto (x + (dx) / 3) (y + (dy /2));
 				Graphics.draw_string str
 			in
-			draw_b (x / 6) (y / 12) (x / 7) (y / 12) 			"Save"		;
-			draw_b (x / 6) (y / 6 + 20) (x / 7) (y / 12) 		"Eat"		;
-			draw_b (x * 2 / 6) (y / 12) (x / 7) (y / 12) 		"Retry"		;
-			draw_b (x * 2 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Thunder"	;
+			if (tama#is_dead <> true) then (
+				draw_b (x * 4 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Kill"		;
+				draw_b (x * 3 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Bath"		;	
+				draw_b (x / 6) (y / 6 + 20) (x / 7) (y / 12) 		"Eat"		;
+				draw_b (x * 2 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Thunder")
+			;
 			draw_b (x * 3 / 6) (y / 12) (x / 7) (y / 12) 		"Load"		;
-			draw_b (x * 3 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Bath"		;	
 			draw_b (x * 4 / 6) (y / 12) (x / 7) (y / 12) 		"Exit"		;
-			draw_b (x * 4 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Kill"
+			draw_b (x * 2 / 6) (y / 12) (x / 7) (y / 12) 		"Retry"		;
+			draw_b (x / 6) (y / 12) (x / 7) (y / 12) 			"Save"		
 
 		let draw action tama = 
 			Graphics.resize_window 1600 1200 ; Graphics.clear_graph () ;
@@ -205,9 +207,9 @@ module Graphics : GRAPHIC_INTERFACE =
 					Graphics.set_color Graphics.white;
 			draw_pika (Graphics.size_x ()) (Graphics.size_y ()) tama action ;
 			let (health, energy, hygiene, happiness) = tama#return_data_tuple in
-			draw_hud (Graphics.size_x ()) (Graphics.size_y ()) health energy hygiene happiness 
+			draw_hud (Graphics.size_x ()) (Graphics.size_y ()) health energy hygiene happiness  
 			; 
-			draw_buttons (Graphics.size_x ()) (Graphics.size_y ())
+			draw_buttons (Graphics.size_x ()) (Graphics.size_y ()) tama
 			;
 			Graphics.synchronize () ;
 			Tama.TamaMonad.return tama
