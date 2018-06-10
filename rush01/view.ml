@@ -6,7 +6,7 @@
 (*   By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+        *)
 (*                                                +#+#+#+#+#+   +#+           *)
 (*   Created: 2018/06/08 23:07:10 by agrumbac          #+#    #+#             *)
-(*   Updated: 2018/06/10 14:43:48 by agrumbac         ###   ########.fr       *)
+(*   Updated: 2018/06/10 15:56:56 by agrumbac         ###   ########.fr       *)
 (*                                                                            *)
 (* ************************************************************************** *)
 
@@ -146,40 +146,27 @@ module Graphics : GRAPHIC_INTERFACE =
 
 
 		let draw_hud x y health energy hygiene happiness  =
-			Graphics.moveto (x / 7) ((5 * y) / 6) ;
-			Graphics.draw_string ("health: " ^ (string_of_int health)) ;
+			let set_wise_color value =
+				if value < 25 then
+					Graphics.set_color Graphics.red
+				else if value < 50 then
+					Graphics.set_color Graphics.yellow
+				else
+					Graphics.set_color Graphics.green
+			in
+			let draw_progress_bar xpos str value =
+				set_wise_color value;
+				Graphics.moveto ((xpos * x) / 6) (y - 70);
+				Graphics.draw_string (str ^ (string_of_int value));
+				Graphics.draw_rect ((xpos * x) / 6) (y - 50) (200) (20);
+				Graphics.fill_rect ((xpos * x) / 6) (y - 50) (200 * value / 100) (20)
 
-			Graphics.draw_rect (x / 7) ((6 * y) / 7) (x / 21) (y / 8);
-			if (health < 25) then Graphics.set_color Graphics.red ;
-			Graphics.fill_rect (x / 7) ((6 * y) / 7) (x / 21) ((y * health) / (8 * 100));
-			Graphics.set_color Graphics.white ;
+			in
 
-			Graphics.moveto (2*x / 7) (y - (y / 6)) ;
-			Graphics.draw_string ("energy: " ^ (string_of_int energy)) ;
-
-			Graphics.draw_rect (2*x / 7) ((6 * y) / 7) (x / 21) ((y * 100) / (8 * 100));
-			if (energy < 25) then Graphics.set_color Graphics.red ;
-			Graphics.fill_rect (2*x / 7) ((6 * y) / 7) (x / 21) ((y * energy) / (8 * 100));
-			Graphics.set_color Graphics.white ;
-
-			Graphics.moveto (3* x / 7) (y - (y / 6)) ;
-			Graphics.draw_string ("hygiene: " ^ (string_of_int hygiene)) ;
-
-			Graphics.draw_rect (3*x / 7) ((6 * y) / 7) (x / 21) ((y * 100) / (8 * 100));
-			if (hygiene < 25) then Graphics.set_color Graphics.red ;
-			Graphics.fill_rect (3*x / 7) ((6 * y) / 7) (x / 21) ((y * hygiene) / (8 * 100));
-			Graphics.set_color Graphics.white ;
-
-
-			Graphics.moveto (5* x / 7) (y - (y / 6)) ;
-			Graphics.draw_string ("happiness: " ^ (string_of_int happiness));
-
-			Graphics.draw_rect (5*x / 7) ((6 * y) / 7) (x / 21) ((y) / (8));
-			if (happiness < 25) then Graphics.set_color Graphics.red ;
-			Graphics.fill_rect (5*x / 7) ((6 * y) / 7) (x / 21) ((y * happiness) / (8 * 100)) ;
-			Graphics.set_color Graphics.white
-
-			(* TODO progress bar  *)
+			draw_progress_bar 1 "HEALTH | " health;
+			draw_progress_bar 2 "ENERGY | " energy;
+			draw_progress_bar 3 "HYGIENE | " hygiene;
+			draw_progress_bar 4 "HAPPINESS | " happiness
 
 		let draw_buttons x y tama =
 			let draw_b x y dx dy str =
@@ -188,13 +175,20 @@ module Graphics : GRAPHIC_INTERFACE =
 				Graphics.draw_string str
 			in
 			if (tama#is_dead <> true) then (
+				Graphics.set_color Graphics.red;
 				draw_b (x * 1 / 8) (y / 6 + 20) (x / 9) (y / 12) 	"KILL"		;
+				Graphics.set_color Graphics.blue;
 				draw_b (x * 2 / 8) (y / 6 + 20) (x / 9) (y / 12) 	"BATH"		;
+				Graphics.set_color Graphics.green;
 				draw_b (x * 3 / 8) (y / 6 + 20) (x / 9) (y / 12)	"EAT"		;
+				Graphics.set_color Graphics.cyan;
 				draw_b (x * 4 / 8) (y / 6 + 20) (x / 9) (y / 12) 	"THUNDER"	;
+				Graphics.set_color Graphics.magenta;
 				draw_b (x * 5 / 8) (y / 6 + 20) (x / 9) (y / 12) 	"DANCE"	;
+				Graphics.set_color Graphics.yellow;
 				draw_b (x * 6 / 8) (y / 6 + 20) (x / 9) (y / 12) 	"REST")
 			;
+			Graphics.set_color Graphics.white;
 			draw_b (x * 3 / 6) (y / 12) (x / 7) (y / 12) 		"LOAD"		;
 			draw_b (x * 4 / 6) (y / 12) (x / 7) (y / 12) 		"EXIT"		;
 			draw_b (x * 2 / 6) (y / 12) (x / 7) (y / 12) 		"RETRY"		;
