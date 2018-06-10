@@ -1,5 +1,6 @@
 let lire_image_ppm name =
- let fd = open_in_bin name in
+  try
+  let fd = open_in_bin name in
    let first_line = input_line fd
    in
    let (width,height) =
@@ -40,7 +41,16 @@ let lire_image_ppm name =
         in begin loop_j 0 ; loop_i (i + 1) end
     in loop_i 0 ;
     close_in fd ;
-    img
+  img
+  with 
+  _ -> prerr_endline (name ^ " can not be used")  ; Array.make_matrix 0 0 (Graphics.rgb 0 0 0)
+
+let bath = lire_image_ppm "./textures/bath.ppm"
+let dead = lire_image_ppm "./textures/dead.ppm"
+let eat = lire_image_ppm "./textures/eat.ppm"
+let hello = lire_image_ppm "./textures/hello.ppm"
+let kill = lire_image_ppm "./textures/kill.ppm"
+let thunder = lire_image_ppm "./textures/thunder.ppm"
 
 let draw_image img x y = 
     Graphics.draw_image (Graphics.make_image img) x y

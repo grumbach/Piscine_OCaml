@@ -131,7 +131,6 @@ struct
 (* ------------------------- recover_from ----------------------------------- *)
 
 	let recover_from filename (tama:pet) =
-		prerr_endline "recover_from";
 		let (hp, en, hy, ha) =
 			try
 				let istream = open_in filename in

@@ -90,7 +90,7 @@ module Make_User_Interface : MAKE_USER_INTERFACE =
 				Graphic_Interface.init () ; main_loop (Tama.TamaMonad.auto_load ()) (Graphic_Interface.getTime ())	
 			with 
 			| Graphics.Graphic_failure _ -> prerr_endline "Very very funny. Have a day!\n"
-			| _ -> prerr_endline "Something went wrong, plz contact mgrimald or agrumbac and explain exactly WHAT you were doing\nAnyway, have a good day"
+			| _ -> prerr_endline "Something went wrong, plz contact mgrimald or agrumbac and explain exactly WHAT you were doing\nAnyway, have a good day :)"
 	end
 
 
@@ -104,6 +104,9 @@ module Graphics : GRAPHIC_INTERFACE =
 			(	
 				try
 					Graphics.resize_window 1200 1000 ; Graphics.clear_graph () ;
+					Graphics.set_color Graphics.black;
+					Graphics.fill_rect 0 0 (Graphics.size_x ()) (Graphics.size_y ()) ;
+					Graphics.set_color Graphics.white;
 					let x = Graphics.size_x ()
 						and y = Graphics.size_y () 
 					in
@@ -115,15 +118,22 @@ module Graphics : GRAPHIC_INTERFACE =
 					| _ -> ()
 			) ;  print_endline "Goodbye. Hope you enjoyed this little game"
 
-		let draw_pika x y = 
-			Graphics.fill_rect (x / 4) (y / 3) (x / 2) (y / 3)	;
-			Graphics.fill_circle ((x * 2) / 9) ((y * 2) / 3) (70)	;
-			Graphics.fill_circle ((x * 7) / 9) ((y * 2) / 3) (70)	;
-			Graphics.set_color Graphics.white	;
-			Graphics.fill_circle ((x * 2) / 6) ((y * 2) / 3 - 30) (70)	;
-			Graphics.fill_circle ((x * 4) / 6) ((y * 2) / 3 - 30) (70)	;
-			Graphics.fill_rect ((x * 2) / 6) (y * 2/ 5) (x - (x * 2) / 6) (y / 10)	;
-			Graphics.set_color Graphics.black
+		let draw_pika x y pika (action:action) = 
+			(*Graphics.fill_rect (x / 4) (y / 3) (x / 4) ((y / 3)/2)	;
+			Graphics.fill_circle ((x * 2) / 9) ((y * 1) / 3) ((70)/2)	;
+			Graphics.fill_circle ((x * 7) / 9) ((y * 1) / 3) ((70)	/2);
+			Graphics.set_color Graphics.black ;
+			Graphics.fill_circle ((x * 2) / 6) ((y * 1) / 3 - 30) ((70)/2)	;
+			Graphics.fill_circle ((x * 4) / 6) ((y * 1) / 3 - 30) ((70)/2)	;
+			Graphics.fill_rect ((x * 2) / 6) (y * 2/ 5) (x - (x * 2) / 12) ((y / 10)/2)	;
+			Graphics.set_color Graphics.white	;*)
+			if pika#is_dead then TryHard.draw_image TryHard.dead  (x / 7) (y / 3)  
+			else match action with
+				| Eat 		 -> TryHard.draw_image TryHard.eat  x y  
+				| Thunder 	 -> TryHard.draw_image TryHard.thunder  x y  
+				| Bath		 -> TryHard.draw_image TryHard.bath  x y  
+				| Kill		 -> TryHard.draw_image TryHard.kill  x y  
+				| _ 		 -> TryHard.draw_image TryHard.hello  (x / 4) 25  
 
 
 		let draw_hud x y health energy hygiene happiness  =
@@ -135,6 +145,7 @@ module Graphics : GRAPHIC_INTERFACE =
 			Graphics.draw_string ("hygiene: " ^ (string_of_int hygiene)) ;
 			Graphics.rmoveto (x / 7) 0 ;
 			Graphics.draw_string ("happiness: " ^ (string_of_int happiness)) 
+			(* TODO progress bar  *)
 
 		let draw_buttons x y = 
 			let draw_b x y dx dy str = 
@@ -149,13 +160,16 @@ module Graphics : GRAPHIC_INTERFACE =
 			draw_b (x * 3 / 6) (y / 12) (x / 7) (y / 12) 		"Load"		;
 			draw_b (x * 3 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Bath"		;	
 			draw_b (x * 4 / 6) (y / 12) (x / 7) (y / 12) 		"Exit"		;
-			draw_b (x * 4 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Kill"		;
-			()
+			draw_b (x * 4 / 6) (y / 6 + 20) (x / 7) (y / 12) 	"Kill"
 
 		let draw tama = 
-			Graphics.resize_window 1200 1000 ; Graphics.clear_graph () ;
+			Graphics.resize_window 1600 1200 ; Graphics.clear_graph () ;
+			Graphics.set_color Graphics.black;
+					Graphics.fill_rect 0 0 (Graphics.size_x ()) (Graphics.size_y ()) ;
+					Graphics.set_color Graphics.white;
+					
 
-			draw_pika (Graphics.size_x ()) (Graphics.size_y ())  ;
+			draw_pika (Graphics.size_x ()) (Graphics.size_y ()) tama Waiting ;
 			let (health, energy, hygiene, happiness) = tama#return_data_tuple in
 			draw_hud (Graphics.size_x ()) (Graphics.size_y ()) health energy hygiene happiness 
 			; 
