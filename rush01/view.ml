@@ -130,13 +130,13 @@ module Graphics : GRAPHIC_INTERFACE =
 			) ;  print_endline "Goodbye. Hope you enjoyed this little game"
 
 		let draw_pika x y pika (action:action) =
-			if pika#is_dead then TryHard.draw_image TryHard.dead   (x / 7) (y * 2 / 7)
+			if pika#is_dead then Parse_textures.draw_image Parse_textures.dead   (x / 7) (y * 2 / 7)
 			else match action with
-				| Eat 		 -> TryHard.draw_image TryHard.eat     (x / 3) (y / 4 + 25)
-				| Thunder 	 -> TryHard.draw_image TryHard.thunder (x / 3) (y / 4)
-				| Bath		 -> TryHard.draw_image TryHard.bath    (x / 3) (y / 4 + 25)
-				| Kill		 -> TryHard.draw_image TryHard.kill    (x / 3) (y / 4 + 25)
-				| _ 		 -> TryHard.draw_image TryHard.hello   (x / 3) (y / 4 + 25)
+				| Eat 		 -> Parse_textures.draw_image Parse_textures.eat     (x / 3) (y / 4 + 25)
+				| Thunder 	 -> Parse_textures.draw_image Parse_textures.thunder (x / 3) (y / 4)
+				| Bath		 -> Parse_textures.draw_image Parse_textures.bath    (x / 3) (y / 4 + 25)
+				| Kill		 -> Parse_textures.draw_image Parse_textures.kill    (x / 3) (y / 4 + 25)
+				| _ 		 -> Parse_textures.draw_image Parse_textures.hello   (x / 3) (y / 4 + 25)
 
 
 		let draw_hud x y health energy hygiene happiness  =

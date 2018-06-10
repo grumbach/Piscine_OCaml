@@ -6,13 +6,13 @@
 #    By: agrumbac <agrumbac@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/05/31 15:22:28 by agrumbac          #+#    #+#              #
-#    Updated: 2018/06/10 13:14:35 by agrumbac         ###   ########.fr        #
+#    Updated: 2018/06/10 13:39:34 by agrumbac         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = tama
 
-SOURCES = tryHard.ml tama.ml view.ml  main.ml
+SOURCES = parse_textures.ml tama.ml view.ml  main.ml
 CAMLC = ocamlc
 CAMLOPT = ocamlopt
 CAMLDEP = ocamldep
